@@ -1,0 +1,51 @@
+<!--components/duration-picker/duration-picker.wxml-->
+<view class="duration-picker-mask" wx:if="{{show}}" bindtap="onCancel" catchtouchmove="preventMove">
+  <view class="duration-picker-content" catchtap="stopPropagation">
+    <view class="picker-header">
+      <text class="picker-title">选择持续时间</text>
+    </view>
+    
+    <view class="duration-options">
+      <view 
+        class="duration-option {{selectedDuration === 30 ? 'active' : ''}}"
+        bindtap="selectDuration"
+        data-duration="30"
+      >
+        <text class="option-label">30分钟</text>
+        <text class="option-check" wx:if="{{selectedDuration === 30}}">✓</text>
+      </view>
+      
+      <view 
+        class="duration-option {{selectedDuration === 60 ? 'active' : ''}}"
+        bindtap="selectDuration"
+        data-duration="60"
+      >
+        <text class="option-label">1小时</text>
+        <text class="option-check" wx:if="{{selectedDuration === 60}}">✓</text>
+      </view>
+      
+      <view 
+        class="duration-option {{selectedDuration === 120 ? 'active' : ''}}"
+        bindtap="selectDuration"
+        data-duration="120"
+      >
+        <text class="option-label">2小时</text>
+        <text class="option-check" wx:if="{{selectedDuration === 120}}">✓</text>
+      </view>
+      
+      <view 
+        class="duration-option {{selectedDuration === 1440 ? 'active' : ''}}"
+        bindtap="selectDuration"
+        data-duration="1440"
+      >
+        <text class="option-label">1天</text>
+        <text class="option-check" wx:if="{{selectedDuration === 1440}}">✓</text>
+      </view>
+    </view>
+    
+    <view class="picker-actions">
+      <button class="btn-cancel" bindtap="onCancel">取消</button>
+      <button class="btn-confirm" bindtap="onConfirm">确定</button>
+    </view>
+  </view>
+</view>

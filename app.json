@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/records/records"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "正在做什么",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F7FA"
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

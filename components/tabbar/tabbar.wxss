@@ -1,0 +1,78 @@
+/* components/tabbar/tabbar.wxss */
+
+.tabbar-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 24rpx;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.tabbar {
+  position: relative;
+  width: 680rpx;
+  height: 120rpx;
+  background-color: var(--bg-card);
+  border-radius: 60rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+/* 背景滑块 */
+.slider {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 340rpx;
+  height: 96rpx;
+  background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+  border-radius: 48rpx;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+/* Tab项 */
+.tab-item {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.tab-item:active {
+  transform: scale(0.98);
+}
+
+.tab-item .icon {
+  font-size: 40rpx;
+  transition: transform 0.2s ease;
+}
+
+.tab-item .label {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+/* 选中状态 */
+.tab-item.active .icon {
+  transform: scale(1.05);
+}
+
+.tab-item.active .label {
+  color: white;
+  font-weight: 500;
+}

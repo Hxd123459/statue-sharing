@@ -1,0 +1,122 @@
+/* components/duration-picker/duration-picker.wxss */
+
+.duration-picker-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.duration-picker-content {
+  width: 100%;
+  background-color: var(--bg-card);
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 48rpx 32rpx;
+  padding-bottom: calc(48rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.picker-header {
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.picker-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.duration-options {
+  margin-bottom: 32rpx;
+}
+
+.duration-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 96rpx;
+  padding: 0 32rpx;
+  margin-bottom: 16rpx;
+  background-color: var(--bg-primary);
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s ease;
+}
+
+.duration-option:active {
+  transform: scale(0.98);
+}
+
+.duration-option.active {
+  background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+  border-color: var(--accent-color);
+}
+
+.option-label {
+  font-size: 32rpx;
+  color: var(--text-primary);
+}
+
+.duration-option.active .option-label {
+  color: white;
+  font-weight: 500;
+}
+
+.option-check {
+  font-size: 32rpx;
+  color: white;
+  font-weight: bold;
+}
+
+.picker-actions {
+  display: flex;
+  gap: 24rpx;
+}
+
+.picker-actions button {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.picker-actions button::after {
+  border: none;
+}
+
+.btn-cancel {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.btn-confirm {
+  background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+  color: white;
+  font-weight: 500;
+}
+
+.btn-confirm:active {
+  opacity: 0.8;
+}

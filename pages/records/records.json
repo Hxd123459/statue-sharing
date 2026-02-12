@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "tabbar": "/components/tabbar/tabbar"
+  },
+  "navigationBarTitleText": "我的记录",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

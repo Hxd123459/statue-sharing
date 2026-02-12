@@ -1,0 +1,99 @@
+<!--pages/index/index.wxml-->
+<view class="container theme-{{theme}}">
+  <!-- 头部区域 -->
+  <view class="header">
+    <text class="title">正在做什么</text>
+    <text class="subtitle">{{totalCount}}人在线</text>
+  </view>
+
+  <!-- 滚动区域 -->
+  <scroll-view class="scroll-area" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- 前3名展示区 (Podium样式) -->
+    <view class="podium-container" wx:if="{{topThree.length > 0}}">
+      <view class="podium">
+        <!-- 第2名 -->
+        <view class="podium-item rank-2" wx:if="{{topThree[1]}}">
+          <view class="rank-badge silver">2</view>
+          <view class="avatar-container" 
+                bindtap="selectStatus" 
+                data-id="{{topThree[1].id}}">
+            <view class="avatar-border silver-gradient">
+              <text class="emoji">{{topThree[1].icon}}</text>
+            </view>
+          </view>
+          <text class="status-name">{{topThree[1].name}}</text>
+          <text class="status-count">{{topThree[1].count}}人</text>
+        </view>
+
+        <!-- 第1名 -->
+        <view class="podium-item rank-1" wx:if="{{topThree[0]}}">
+          <text class="crown">👑</text>
+          <view class="rank-badge gold">1</view>
+          <view class="avatar-container champion" 
+                bindtap="selectStatus" 
+                data-id="{{topThree[0].id}}">
+            <view class="avatar-border gold-gradient">
+              <text class="emoji large">{{topThree[0].icon}}</text>
+            </view>
+          </view>
+          <text class="status-name">{{topThree[0].name}}</text>
+          <text class="status-count large">{{topThree[0].count}}人</text>
+        </view>
+
+        <!-- 第3名 -->
+        <view class="podium-item rank-3" wx:if="{{topThree[2]}}">
+          <view class="rank-badge bronze">3</view>
+          <view class="avatar-container" 
+                bindtap="selectStatus" 
+                data-id="{{topThree[2].id}}">
+            <view class="avatar-border bronze-gradient">
+              <text class="emoji">{{topThree[2].icon}}</text>
+            </view>
+          </view>
+          <text class="status-name">{{topThree[2].name}}</text>
+          <text class="status-count">{{topThree[2].count}}人</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 第4名及以后展示区 (列表样式) -->
+    <view class="status-list">
+      <view 
+        class="status-card {{item.isMine ? 'mine' : ''}}"
+        wx:for="{{restList}}" 
+        wx:key="id"
+        bindtap="selectStatus"
+        data-id="{{item.id}}"
+      >
+        <view class="card-left">
+          <view class="rank-number">{{item.rank}}</view>
+          <text class="emoji">{{item.icon}}</text>
+          <text class="name">{{item.name}}</text>
+        </view>
+        <view class="card-right">
+          <text class="count">{{item.count}}人</text>
+          <text class="active-tag" wx:if="{{item.isMine}}">进行中</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部安全距离 -->
+    <view class="bottom-safe-area"></view>
+  </scroll-view>
+
+  <!-- 自定义 TabBar -->
+  <tabbar current="0" bind:change="onTabChange"></tabbar>
+
+  <!-- 持续时间选择器 -->
+  <duration-picker 
+    show="{{showDurationPicker}}"
+    bind:cancel="onDurationCancel"
+    bind:confirm="onDurationConfirm"
+  ></duration-picker>
+
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>
