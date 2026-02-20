@@ -3,7 +3,8 @@ App({
   globalData: {
     theme: 'light', // light | dark
     userInfo: null,
-    openId: null
+    openId: null,
+    envId: 'cloud1-0g7t1v9lab94a58b' // 与云开发控制台环境 ID 一致，callFunction 会用到
   },
 
   onLaunch() {
@@ -12,7 +13,7 @@ App({
       console.error('请使用 2.2.3 或以上的基础库以使用云能力');
     } else {
       wx.cloud.init({
-        env: 'cloud1-0g7t1v9lab94a58b',
+        env: this.globalData.envId,
         traceUser: true,
       });
     }

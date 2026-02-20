@@ -47,7 +47,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.19.4",
+  "libVersion": "3.14.2",
   "appid": "wxd858df50085e132c",
   "projectname": "status-sharing-miniprogram",
   "condition": {},
@@ -56,5 +56,6 @@
     "tabSize": 2
   },
   "simulatorPluginLibVersion": {},
+  "cloudfunctionRoot": "cloudfunctions/",
   "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
 }

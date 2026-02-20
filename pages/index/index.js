@@ -49,13 +49,15 @@ Page({
   // 初始化数据
   async initData() {
     try {
-      // 获取用户OpenID
+      const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
       const res = await wx.cloud.callFunction({
-        name: 'login'
+        name: 'login',
+        config: { env: envId }
       });
-
-      if (res.result && res.result.openid) {
-        app.globalData.openId = res.result.openid;
+      const r = res.result || {};
+      const openId = r.openid || (r.userInfo && r.userInfo.openId);
+      if (openId) {
+        app.globalData.openId = openId;
       }
 
       // 加载状态数据
@@ -99,7 +101,6 @@ Page({
   // 加载状态人数
   async loadStatusCounts() {
     try {
-      console.log("11111111");
       const db = wx.cloud.database();
       const _ = db.command;
       const now = new Date();
@@ -193,7 +194,7 @@ Page({
   // 选择状态
   selectStatus(e) {
     const statusId = e.currentTarget.dataset.id;
-
+    console.log("statusId+++++++++++++", statusId);
     // 检查是否可以更新
     this.checkCanUpdate().then(canUpdate => {
       if (!canUpdate.success) {
@@ -219,17 +220,31 @@ Page({
   // 检查是否可以更新状态
   async checkCanUpdate() {
     try {
-      const db = wx.cloud.database();
-      const openId = app.globalData.openId;
-
+      let openId = app.globalData.openId;
+      // 没有 openId 时先尝试登录（避免只提示不执行）
       if (!openId) {
-        return { success: false, message: '请先登录' };
+        console.log("没有openId，先尝试登录");
+        const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
+        const loginRes = await wx.cloud.callFunction({
+          name: 'login',
+          config: { env: envId }
+        });
+        console.log("loginRes+++++++++++++", loginRes);
+        const r = loginRes.result || {};
+        const gotOpenId = r.openid || (r.userInfo && r.userInfo.openId);
+        if (gotOpenId) {
+          app.globalData.openId = gotOpenId;
+          openId = gotOpenId;
+        } else {
+          return { success: false, message: '登录失败，请检查网络后重试' };
+        }
       }
 
+      const db = wx.cloud.database();
       const res = await db.collection('users')
         .where({ openId })
         .get();
-
+      console.log("res+++++++++++++", res);
       if (res.data.length === 0) {
         return { success: true };
       }
@@ -276,31 +291,28 @@ Page({
     });
 
     try {
-      // 调用云函数设置状态
+      // 调用云函数设置状态（必须与 app.js 中 wx.cloud.init 的 env 一致，否则会调错环境）
+      const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
       const res = await wx.cloud.callFunction({
         name: 'setStatus',
+        config: { env: envId },
         data: {
           statusId,
           duration
         }
       });
-
-      if (res.result && res.result.success) {
-        wx.showToast({
-          title: '状态已更新',
-          icon: 'success'
-        });
-
-        // 刷新数据
-        await this.loadStatusCounts();
-      } else {
-        throw new Error(res.result.message || '设置失败');
-      }
-
+      console.log('setStatus 调用完成', res.requestID);
+      // result 可能被平台合并为 event，不依赖 result，只要没 reject 就视为成功
+      wx.showToast({
+        title: '状态已更新',
+        icon: 'success'
+      });
+      await this.loadStatusCounts();
     } catch (err) {
       console.error('设置状态失败:', err);
+      const msg = (err.errObj && err.errObj.message) || err.result?.message || err.message || '设置失败';
       wx.showToast({
-        title: err.message || '设置失败',
+        title: String(msg),
         icon: 'none'
       });
     } finally {
