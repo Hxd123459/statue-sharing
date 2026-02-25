@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "openapi": [
+    ]
+  },
+  "triggers": [
+    {
+      "name": "cleanExpiredStatus",
+      "type": "timer",
+      "config": "0 */1 * * * *"
+    }
+  ]
+}

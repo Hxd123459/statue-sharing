@@ -5,6 +5,7 @@ const { debounce } = require('../../utils/util.js');
 
 Page({
   data: {
+    topNavigationheight: app.globalData.topNavigationheight,
     theme: 'light',
     statusList: [],
     topThree: [],
@@ -21,10 +22,8 @@ Page({
   onLoad() {
     // 设置主题
     this.setData({ theme: app.getTheme() });
-
     // 初始化数据
     this.initData();
-
     // 初始化实时监听
     this.initWatcher();
   },
@@ -78,10 +77,7 @@ Page({
   initWatcher() {
     const db = wx.cloud.database();
 
-    this.watcher = db.collection('users')
-      .where({
-        currentStatus: db.command.neq(null)
-      })
+    this.watcher = db.collection('user_status')
       .watch({
         onChange: (snapshot) => {
           // 延迟更新，避免频繁刷新
@@ -104,22 +100,17 @@ Page({
       const db = wx.cloud.database();
       const _ = db.command;
       const now = new Date();
-
+      const openId = app.globalData.openId;
       // 查询所有有效状态的用户（只取必要字段）
-      const res = await db.collection('users')
-        .where({
-          currentStatus: _.neq(null),
-          statusEndTime: _.gt(now)
-        })
-        .field({ currentStatus: true })
-        .get();
-
+      const result = await db.collection('user_status')
+      .get();
+      console.log("result+++++++++++++", result);
       // 前端分组统计
       const countMap = {};
-      (res.data || []).forEach(user => {
-        const status = user.currentStatus;
+      (result.data || []).forEach(item => {
+        const status = item.statusId;
         if (status) {
-          countMap[status] = (countMap[status] || 0) + 1;
+          countMap[status] = item.total;
         }
       });
 
@@ -130,7 +121,7 @@ Page({
 
       // 获取当前用户状态
       let myStatus = null;
-      const openId = app.globalData.openId;
+      
       if (openId) {
         const myRes = await db.collection('users')
           .where({ openId })
@@ -194,7 +185,6 @@ Page({
   // 选择状态
   selectStatus(e) {
     const statusId = e.currentTarget.dataset.id;
-    console.log("statusId+++++++++++++", statusId);
     // 检查是否可以更新
     this.checkCanUpdate().then(canUpdate => {
       if (!canUpdate.success) {
@@ -209,7 +199,8 @@ Page({
       // 显示持续时间选择器
       this.setData({
         showDurationPicker: true,
-        selectedStatusId: statusId
+        selectedStatusId: statusId,
+        selectedStatusName: STATUS_MAP[statusId]?.name
       });
 
       // 触觉反馈
@@ -229,7 +220,6 @@ Page({
           name: 'login',
           config: { env: envId }
         });
-        console.log("loginRes+++++++++++++", loginRes);
         const r = loginRes.result || {};
         const gotOpenId = r.openid || (r.userInfo && r.userInfo.openId);
         if (gotOpenId) {
@@ -244,7 +234,6 @@ Page({
       const res = await db.collection('users')
         .where({ openId })
         .get();
-      console.log("res+++++++++++++", res);
       if (res.data.length === 0) {
         return { success: true };
       }
@@ -284,7 +273,7 @@ Page({
   async onDurationConfirm(e) {
     const duration = e.detail.duration;
     const statusId = this.data.selectedStatusId;
-
+    const statusName = this.data.selectedStatusName;
     this.setData({
       showDurationPicker: false,
       loading: true
@@ -294,14 +283,15 @@ Page({
       // 调用云函数设置状态（必须与 app.js 中 wx.cloud.init 的 env 一致，否则会调错环境）
       const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
       const res = await wx.cloud.callFunction({
-        name: 'setStatus',
+        name: 'addStatus',
         config: { env: envId },
         data: {
           statusId,
+          statusName,
           duration
         }
       });
-      console.log('setStatus 调用完成', res.requestID);
+      console.log('addStatus 调用完成', res.requestID);
       // result 可能被平台合并为 event，不依赖 result，只要没 reject 就视为成功
       wx.showToast({
         title: '状态已更新',

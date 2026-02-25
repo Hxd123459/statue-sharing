@@ -1,7 +1,7 @@
 /* app.wxss - 全局样式 */
 
 /* 白天主题 */
-page.light {
+.theme-light {
   --bg-primary: #F5F7FA;
   --bg-card: #FFFFFF;
   --text-primary: #1A1A1A;
@@ -17,7 +17,7 @@ page.light {
 }
 
 /* 黑夜主题 */
-page.dark {
+.theme-dark {
   --bg-primary: #1C1C1E;
   --bg-card: #2C2C2E;
   --text-primary: #FFFFFF;
