@@ -42,7 +42,6 @@ App({
   // 初始化主题
   initTheme() {
     const hour = new Date().getHours();
-    console.log("++++++++++++++++++" + hour)
     const theme = (hour >= 7 && hour < 16) ? 'light' : 'dark';
     this.globalData.theme = theme;
   },

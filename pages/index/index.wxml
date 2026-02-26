@@ -1,13 +1,11 @@
 <!--pages/index/index.wxml-->
 <view class="container theme-{{theme}}">
 
-  <view class="top-navigation" style="width: 100%;height: {{topNavigationheight}}px;"></view>  
-  <!-- 头部区域 -->
-  <!-- <view class="header" style="margin-top: {{topNavigationheight}}px;">
-    <text class="title">正在做什么</text>
-    <text class="subtitle">{{totalCount}}人在线</text>
-  </view> -->
-
+  <view class="top-navigation" style="width: 100%;height: {{buttonBoundingHeigth}}px;margin-top:{{buttonBoundingTop}}px;">
+    <view class="top-navigation-left" style="height: 100%;display: flex;align-items: center;justify-content: center;">
+      <text class="current-status-title">当前状态：{{currentStatusInfo.icon}} {{currentStatusInfo.name}} </text>
+    </view>
+  </view>  
   <!-- 滚动区域 -->
   <scroll-view class="scroll-area" scroll-y enhanced show-scrollbar="{{false}}" style="margin-top: {{topNavigationheight}}px;">
     <!-- 前3名展示区 (Podium样式) -->

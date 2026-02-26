@@ -6,6 +6,10 @@ const { debounce } = require('../../utils/util.js');
 Page({
   data: {
     topNavigationheight: app.globalData.topNavigationheight,
+    //胶囊体离顶部高度
+    buttonBoundingTop: app.globalData.buttonBoundingTop,
+    //胶囊体高度
+    buttonBoundingHeigth: app.globalData.buttonBoundingHeigth,
     theme: 'light',
     statusList: [],
     topThree: [],
@@ -14,7 +18,8 @@ Page({
     myCurrentStatus: null,
     showDurationPicker: false,
     selectedStatusId: null,
-    loading: true
+    loading: true,
+    currentStatusInfo:{},
   },
 
   watcher: null,
@@ -104,7 +109,6 @@ Page({
       // 查询所有有效状态的用户（只取必要字段）
       const result = await db.collection('user_status')
       .get();
-      console.log("result+++++++++++++", result);
       // 前端分组统计
       const countMap = {};
       (result.data || []).forEach(item => {
@@ -121,17 +125,12 @@ Page({
 
       // 获取当前用户状态
       let myStatus = null;
-      
-      if (openId) {
-        const myRes = await db.collection('users')
-          .where({ openId })
-          .field({ currentStatus: true })
-          .get();
-        if (myRes.data?.[0]?.currentStatus) {
-          myStatus = myRes.data[0].currentStatus;
-        }
+      if(openId){
+        const result = await db.collection('status_records')
+        .where({ openid: openId })
+        .get();
+        myStatus = result.data[0].statusId;
       }
-
       // 交给页面处理
       this.processStatusData(statusList, myStatus);
 
@@ -141,7 +140,6 @@ Page({
       wx.showToast({ title: '加载失败', icon: 'none' });
     }
   },
-
   // 处理状态数据
   processStatusData(countData, myStatus) {
     // 创建状态计数映射
@@ -149,7 +147,8 @@ Page({
     countData.forEach(item => {
       countMap[item._id] = item.count;
     });
-
+    // 映射当前用户的状态
+    const targetItem = STATUS_LIST.find(item => item.id === myStatus);
     // 生成完整状态列表
     const statusList = STATUS_LIST.map((status, index) => ({
       ...status,
@@ -178,7 +177,8 @@ Page({
       topThree,
       restList,
       totalCount,
-      myCurrentStatus: myStatus
+      myCurrentStatus: myStatus,
+      currentStatusInfo:targetItem || { name: '无', icon: '' }
     });
   },
 

@@ -13,26 +13,6 @@
   transition: background-color 0.3s ease;
 }
 
-/* 头部区域 */
-.header {
-  padding: 24rpx 32rpx;
-  text-align: center;
-  background-color: var(--bg-primary);
-}
-
-.header .title {
-  display: block;
-  font-size: 36rpx;
-  font-weight: bold;
-  color: var(--text-primary);
-  margin-bottom: 8rpx;
-}
-
-.header .subtitle {
-  display: block;
-  font-size: 28rpx;
-  color: var(--text-secondary);
-}
 
 /* 滚动区域 */
 .scroll-area {
@@ -302,4 +282,8 @@
   margin-top: 24rpx;
   font-size: 28rpx;
   color: white;
+}
+.current-status-title{
+  font-size: 28rpx;
+  color: var(--text-primary);
 }
