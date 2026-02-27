@@ -19,8 +19,8 @@
             <view class="avatar-border silver-gradient">
               <text class="emoji">{{topThree[1].icon}}</text>
             </view>
+            <view class="rank-badge silver">2</view>
           </view>
-          <view class="rank-badge silver">2</view>
           <text class="status-name">{{topThree[1].name}}</text>
           <text class="status-count">{{topThree[1].count}}人</text>
         </view>
@@ -28,27 +28,26 @@
         <!-- 第1名 -->
         <view class="podium-item rank-1" wx:if="{{topThree[0]}}">
           <text class="crown">👑</text>
-          <view class="rank-badge gold">1</view>
           <view class="avatar-container champion" 
                 bindtap="selectStatus" 
                 data-id="{{topThree[0].id}}">
             <view class="avatar-border gold-gradient">
               <text class="emoji large">{{topThree[0].icon}}</text>
             </view>
+            <view class="rank-badge gold">1</view>
           </view>
           <text class="status-name">{{topThree[0].name}}</text>
           <text class="status-count large">{{topThree[0].count}}人</text>
         </view>
-
         <!-- 第3名 -->
         <view class="podium-item rank-3" wx:if="{{topThree[2]}}">
-          <view class="rank-badge bronze">3</view>
           <view class="avatar-container" 
                 bindtap="selectStatus" 
                 data-id="{{topThree[2].id}}">
             <view class="avatar-border bronze-gradient">
               <text class="emoji">{{topThree[2].icon}}</text>
             </view>
+            <view class="rank-badge bronze">3</view>
           </view>
           <text class="status-name">{{topThree[2].name}}</text>
           <text class="status-count">{{topThree[2].count}}人</text>

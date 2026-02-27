@@ -62,9 +62,21 @@
 }
 
 /* 排名徽章 */
+/* 头像容器 - 添加相对定位 */
+.avatar-container {
+  margin: 24rpx 0;
+  transition: transform 0.2s ease;
+  position: relative;  /* 添加这行 */
+}
+
+.avatar-container:active {
+  transform: scale(0.95);
+}
+
+/* 排名徽章 - 重新定位到底部 */
 .rank-badge {
-  position: absolute;
-  top: -12rpx;
+  position: absolute;  /* 改为绝对定位 */
+  bottom: -24rpx;      /* 负值让它向下移，一半在外面 */
   left: 50%;
   transform: translateX(-50%);
   width: 48rpx;
@@ -76,7 +88,7 @@
   font-size: 28rpx;
   font-weight: bold;
   color: white;
-  z-index: 2;
+  z-index: 3;  /* 确保在最上层 */
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
 }
 

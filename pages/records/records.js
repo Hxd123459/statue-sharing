@@ -198,7 +198,7 @@ Page({
   // Tab切换
   onTabChange(e) {
     const current = e.detail.current;
-    if (current === 0) {
+    if (current == 0) {
       // 返回首页
       wx.navigateBack();
     }

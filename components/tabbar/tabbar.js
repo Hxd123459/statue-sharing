@@ -15,7 +15,6 @@ Component({
       
       // 触觉反馈
       wx.vibrateShort({ type: 'light' });
-      
       // 触发change事件
       this.triggerEvent('change', {
         current: index

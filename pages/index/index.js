@@ -129,11 +129,10 @@ Page({
         const result = await db.collection('status_records')
         .where({ openid: openId })
         .get();
-        myStatus = result.data[0].statusId;
+        myStatus = result.data.length === 0 ? null : result.data[0].statusId;
       }
       // 交给页面处理
       this.processStatusData(statusList, myStatus);
-
     } catch (err) {
       console.error('加载状态失败:', err);
       // 可选：显示 toast 提示
@@ -316,7 +315,9 @@ Page({
   // Tab切换
   onTabChange(e) {
     const current = e.detail.current;
-    if (current === 1) {
+    console.log("=========",current)
+    if (current == 1) {
+      console.log("123123123123",current)
       wx.navigateTo({
         url: '/pages/records/records'
       });
