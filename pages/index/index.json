@@ -1,7 +1,7 @@
 {
   "usingComponents": {
     "tabbar": "/components/tabbar/tabbar",
-    "duration-picker": "/components/duration-picker/duration-picker"
-  },
-  "navigationBarTitleText": "正在做什么"
+    "duration-picker": "/components/duration-picker/duration-picker",
+    "status":"/components/status/status"
+  }
 }

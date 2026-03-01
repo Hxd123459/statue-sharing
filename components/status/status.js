@@ -1,0 +1,392 @@
+// components/status/status.js
+const app = getApp();
+const { STATUS_LIST, STATUS_MAP } = require('../../utils/constants.js');
+const { debounce } = require('../../utils/util.js');
+Component({
+
+  /**
+   * 组件的属性列表
+   */
+  properties: {
+
+  },
+
+  /**
+   * 组件的初始数据
+   */
+  data: {
+    topNavigationheight: app.globalData.topNavigationheight,
+    //胶囊体离顶部高度
+    buttonBoundingTop: app.globalData.buttonBoundingTop,
+    //胶囊体高度
+    buttonBoundingHeigth: app.globalData.buttonBoundingHeigth,
+    theme: 'light',
+    statusList: [],
+    topThree: [],
+    restList: [],
+    totalCount: 0,
+    myCurrentStatus: null,
+    showDurationPicker: false,
+    selectedStatusId: null,
+    loading: true,
+    currentStatusInfo:{},
+  },
+  watcher: null,
+
+  /**
+   * 组件生命周期 - 注意：组件没有 onLoad/onShow，需使用 attached 和 pageLifetimes
+   */
+  lifetimes: {
+    attached() {
+      // 设置主题
+      this.setData({ theme: app.getTheme() });
+      // 初始化数据
+      this.initData();
+      // 初始化实时监听
+      this.initWatcher();
+    },
+    detached() {
+      // 关闭实时监听
+      if (this.watcher) {
+        this.watcher.close();
+      }
+    },
+  },
+
+  /**
+   * 页面生命周期 - 监听所在页面的显示/隐藏
+   */
+  pageLifetimes: {
+    show() {
+      // 页面展示时刷新数据
+      this.loadStatusCounts();
+    },
+  },
+
+  /**
+   * 组件的方法列表
+   */
+  methods: {
+  
+    // 主题变更回调
+    onThemeChange(newTheme) {
+      this.setData({ theme: newTheme });
+    },
+  
+    // 初始化数据
+    async initData() {
+      try {
+        const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
+        const res = await wx.cloud.callFunction({
+          name: 'login',
+          config: { env: envId }
+        });
+        const r = res.result || {};
+        const openId = r.openid || (r.userInfo && r.userInfo.openId);
+        if (openId) {
+          app.globalData.openId = openId;
+        }
+  
+        // 加载状态数据
+        await this.loadStatusCounts();
+  
+        this.setData({ loading: false });
+      } catch (err) {
+        console.error('初始化失败:', err);
+        this.setData({ loading: false });
+        wx.showToast({
+          title: '加载失败',
+          icon: 'none'
+        });
+      }
+    },
+  
+    // 初始化实时监听
+    initWatcher() {
+      const db = wx.cloud.database();
+  
+      this.watcher = db.collection('status_records')
+        .watch({
+          onChange: (snapshot) => {
+            // 延迟更新，避免频繁刷新
+            this.debouncedUpdate();
+          },
+          onError: (err) => {
+            console.error('监听失败:', err);
+          }
+        });
+    },
+  
+    // 防抖更新
+    debouncedUpdate: debounce(function () {
+      this.loadStatusCounts();
+    }, 1000),
+  
+    // 加载状态人数
+    async loadStatusCounts() {
+      try {
+        const db = wx.cloud.database();
+        const _ = db.command;
+        const now = new Date();
+        const openId = app.globalData.openId;
+        // 查询所有有效状态的用户（只取必要字段）
+        const result = await db.collection('status_records')
+        .get();
+        // 前端分组统计
+        const countMap = {};
+        (result.data || []).forEach(item => {
+          const status = item.statusId;
+          if (status) {
+            countMap[status] = item.total;
+          }
+        });
+  
+        const statusList = Object.entries(countMap).map(([status, count]) => ({
+          _id: status,
+          count
+        }));
+  
+        // 获取当前用户状态
+        let myStatus = null;
+        if(openId){
+          const result = await db.collection('user_status')
+          .where({ openid: openId, isExpired: false })
+          .get();
+          myStatus = result.data.length === 0 ? null : result.data[0].statusId;
+        }
+        // 交给页面处理
+        this.processStatusData(statusList, myStatus);
+      } catch (err) {
+        console.error('加载状态失败:', err);
+        // 可选：显示 toast 提示
+        wx.showToast({ title: '加载失败', icon: 'none' });
+      }
+    },
+    // 处理状态数据
+    processStatusData(countData, myStatus) {
+      // 保存旧的排名数据（用于对比）
+      const oldStatusList = this.data.statusList || [];
+      const oldRankMap = {};
+      oldStatusList.forEach(item => {
+        oldRankMap[item.id] = item.rank;
+      });
+  
+      // 创建状态计数映射
+      const countMap = {};
+      countData.forEach(item => {
+        countMap[item._id] = item.count;
+      });
+      
+      // 映射当前用户的状态
+      const targetItem = STATUS_LIST.find(item => item.id === myStatus);
+      
+      // 生成完整状态列表
+      const statusList = STATUS_LIST.map((status, index) => ({
+        ...status,
+        count: countMap[status.id] || 0,
+        isMine: status.id === myStatus,
+        rank: 0,
+        // 添加动画相关字段
+        oldRank: oldRankMap[status.id] || 999,
+        rankChange: 0, // 1=上升, -1=下降, 0=不变
+        isNew: !oldRankMap[status.id] // 是否新上榜
+      }));
+  
+      // 按人数排序
+      statusList.sort((a, b) => b.count - a.count);
+  
+      // 添加排名和排名变化
+      statusList.forEach((item, index) => {
+        item.rank = index + 1;
+        // 计算排名变化（注意：排名数字越小越靠前）
+        if (item.oldRank === 999) {
+          item.rankChange = 0; // 新上榜
+        } else if (item.rank < item.oldRank) {
+          item.rankChange = 1; // 排名上升
+        } else if (item.rank > item.oldRank) {
+          item.rankChange = -1; // 排名下降
+        } else {
+          item.rankChange = 0; // 不变
+        }
+      });
+  
+      // 计算总人数
+      const totalCount = statusList.reduce((sum, item) => sum + item.count, 0);
+  
+      // 分离前3名和其余
+      const topThree = statusList.slice(0, 3);
+      const restList = statusList.slice(3);
+  
+      // 检测前三名是否有变化
+      const oldTopThree = this.data.topThree || [];
+      const topThreeChanged = topThree.some((item, index) => {
+        return !oldTopThree[index] || oldTopThree[index].id !== item.id;
+      });
+  
+      this.setData({
+        statusList,
+        topThree,
+        restList,
+        totalCount,
+        myCurrentStatus: myStatus,
+        currentStatusInfo: targetItem || { name: '无', icon: '' },
+        topThreeChanged, // 标记前三名是否变化
+      });
+  
+      // 如果前三名有变化，触发动画后重置标记
+      if (topThreeChanged) {
+        setTimeout(() => {
+          this.setData({ topThreeChanged: false });
+        }, 800);
+      }
+    },
+    // 选择状态
+    selectStatus(e) {
+      const statusId = e.currentTarget.dataset.id;
+      // 检查是否可以更新
+      this.checkCanUpdate().then(canUpdate => {
+        if (!canUpdate.success) {
+          wx.showToast({
+            title: canUpdate.message,
+            icon: 'none',
+            duration: 2000
+          });
+          return;
+        }
+  
+        // 显示持续时间选择器
+        this.setData({
+          showDurationPicker: true,
+          selectedStatusId: statusId,
+          selectedStatusName: STATUS_MAP[statusId]?.name
+        });
+  
+        // 触觉反馈
+        wx.vibrateShort({ type: 'light' });
+      });
+    },
+  
+    // 检查是否可以更新状态
+    async checkCanUpdate() {
+      try {
+        let openId = app.globalData.openId;
+        // 没有 openId 时先尝试登录（避免只提示不执行）
+        if (!openId) {
+          console.log("没有openId，先尝试登录");
+          const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
+          const loginRes = await wx.cloud.callFunction({
+            name: 'login',
+            config: { env: envId }
+          });
+          const r = loginRes.result || {};
+          const gotOpenId = r.openid || (r.userInfo && r.userInfo.openId);
+          if (gotOpenId) {
+            app.globalData.openId = gotOpenId;
+            openId = gotOpenId;
+          } else {
+            return { success: false, message: '登录失败，请检查网络后重试' };
+          }
+        }
+  
+        const db = wx.cloud.database();
+        const res = await db.collection('users')
+          .where({ openId })
+          .get();
+        if (res.data.length === 0) {
+          return { success: true };
+        }
+  
+        const user = res.data[0];
+        const now = new Date();
+        const lastUpdate = user.lastUpdateTime ? new Date(user.lastUpdateTime) : null;
+  
+        if (lastUpdate) {
+          const diffMinutes = (now - lastUpdate) / 1000 / 60;
+          if (diffMinutes < 5) {
+            const waitMinutes = Math.ceil(5 - diffMinutes);
+            return {
+              success: false,
+              message: `请${waitMinutes}分钟后再切换状态`
+            };
+          }
+        }
+  
+        return { success: true };
+  
+      } catch (err) {
+        console.error('检查更新权限失败:', err);
+        return { success: false, message: '检查失败，请重试' };
+      }
+    },
+  
+    // 取消选择持续时间
+    onDurationCancel() {
+      this.setData({
+        showDurationPicker: false,
+        selectedStatusId: null
+      });
+    },
+  
+    // 确认持续时间
+    async onDurationConfirm(e) {
+      const duration = e.detail.duration;
+      const statusId = this.data.selectedStatusId;
+      const statusName = this.data.selectedStatusName;
+      this.setData({
+        showDurationPicker: false,
+        loading: true
+      });
+  
+      try {
+        // 调用云函数设置状态（必须与 app.js 中 wx.cloud.init 的 env 一致，否则会调错环境）
+        const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
+        const res = await wx.cloud.callFunction({
+          name: 'addStatus',
+          config: { env: envId },
+          data: {
+            statusId,
+            statusName,
+            duration
+          }
+        });
+        console.log('addStatus 调用完成', res.requestID);
+        // result 可能被平台合并为 event，不依赖 result，只要没 reject 就视为成功
+        wx.showToast({
+          title: '状态已更新',
+          icon: 'success'
+        });
+        await this.loadStatusCounts();
+      } catch (err) {
+        console.error('设置状态失败:', err);
+        const msg = (err.errObj && err.errObj.message) || err.result?.message || err.message || '设置失败';
+        wx.showToast({
+          title: String(msg),
+          icon: 'none'
+        });
+      } finally {
+        this.setData({
+          loading: false,
+          selectedStatusId: null
+        });
+      }
+    },
+  
+    // Tab切换
+    onTabChange(e) {
+      const current = e.detail.current;
+      console.log("=========",current)
+      if (current == 1) {
+        console.log("123123123123",current)
+        wx.navigateTo({
+          url: '/pages/records/records'
+        });
+      }
+    },
+  
+    // 下拉刷新
+    async onPullDownRefresh() {
+      await this.loadStatusCounts();
+      wx.stopPullDownRefresh();
+    }
+  }
+})
