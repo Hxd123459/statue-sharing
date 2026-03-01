@@ -8,11 +8,13 @@
   </view>  
   <!-- 滚动区域 -->
   <scroll-view class="scroll-area" scroll-y enhanced show-scrollbar="{{false}}" style="margin-top: {{topNavigationheight}}px;">
+ 
+   
     <!-- 前3名展示区 (Podium样式) -->
-    <view class="podium-container" wx:if="{{topThree.length > 0}}">
+    <view class="podium-container {{topThreeChanged ? 'podium-update' : ''}}" wx:if="{{topThree.length > 0}}">
       <view class="podium">
         <!-- 第2名 -->
-        <view class="podium-item rank-2" wx:if="{{topThree[1]}}">
+        <view class="podium-item rank-2 {{topThree[1].rankChange === 1 ? 'rank-up' : ''}} {{topThree[1].rankChange === -1 ? 'rank-down' : ''}}" wx:if="{{topThree[1]}}">
           <view class="avatar-container" 
                 bindtap="selectStatus" 
                 data-id="{{topThree[1].id}}">
@@ -22,11 +24,11 @@
             <view class="rank-badge silver">2</view>
           </view>
           <text class="status-name">{{topThree[1].name}}</text>
-          <text class="status-count">{{topThree[1].count}}人</text>
+          <text class="status-count count-animate">{{topThree[1].count}}人</text>
         </view>
 
         <!-- 第1名 -->
-        <view class="podium-item rank-1" wx:if="{{topThree[0]}}">
+        <view class="podium-item rank-1 {{topThree[0].rankChange === 1 ? 'rank-up' : ''}} {{topThree[0].rankChange === -1 ? 'rank-down' : ''}}" wx:if="{{topThree[0]}}">
           <text class="crown">👑</text>
           <view class="avatar-container champion" 
                 bindtap="selectStatus" 
@@ -37,10 +39,11 @@
             <view class="rank-badge gold">1</view>
           </view>
           <text class="status-name">{{topThree[0].name}}</text>
-          <text class="status-count large">{{topThree[0].count}}人</text>
+          <text class="status-count large count-animate">{{topThree[0].count}}人</text>
         </view>
+
         <!-- 第3名 -->
-        <view class="podium-item rank-3" wx:if="{{topThree[2]}}">
+        <view class="podium-item rank-3 {{topThree[2].rankChange === 1 ? 'rank-up' : ''}} {{topThree[2].rankChange === -1 ? 'rank-down' : ''}}" wx:if="{{topThree[2]}}">
           <view class="avatar-container" 
                 bindtap="selectStatus" 
                 data-id="{{topThree[2].id}}">
@@ -50,7 +53,7 @@
             <view class="rank-badge bronze">3</view>
           </view>
           <text class="status-name">{{topThree[2].name}}</text>
-          <text class="status-count">{{topThree[2].count}}人</text>
+          <text class="status-count count-animate">{{topThree[2].count}}人</text>
         </view>
       </view>
     </view>
@@ -58,20 +61,25 @@
     <!-- 第4名及以后展示区 (列表样式) -->
     <view class="status-list">
       <view 
-        class="status-card {{item.isMine ? 'mine' : ''}}"
+        class="status-card {{item.isMine ? 'mine' : ''}} {{item.rankChange === 1 ? 'rank-up' : ''}} {{item.rankChange === -1 ? 'rank-down' : ''}}"
         wx:for="{{restList}}" 
         wx:key="id"
         bindtap="selectStatus"
         data-id="{{item.id}}"
       >
         <view class="card-left">
-          <view class="rank-number">{{item.rank}}</view>
+          <view class="rank-number">
+            {{item.rank}}
+            <!-- 排名变化指示 -->
+            <text class="rank-arrow" wx:if="{{item.rankChange === 1}}">↑</text>
+            <text class="rank-arrow down" wx:if="{{item.rankChange === -1}}">↓</text>
+          </view>
           <text class="emoji">{{item.icon}}</text>
           <text class="name">{{item.name}}</text>
         </view>
         <view class="card-right">
-          <text class="count">{{item.count}}人</text>
-          <text class="active-tag" wx:if="{{item.isMine}}">进行中</text>
+          <text class="count count-animate">{{item.count}}人</text>
+          <!-- <text class="active-tag" wx:if="{{item.isMine}}">进行中</text> -->
         </view>
       </view>
     </view>

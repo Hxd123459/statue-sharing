@@ -8,7 +8,7 @@ exports.main = async (event, context) => {
     const now = new Date();
     console.log("开始执行清理过期状态函数")
     // 1. 查询所有已过期的记录
-    const expiredRecords = await db.collection('status_records')
+    const expiredRecords = await db.collection('user_status')
       .where({
         expireTime: _.lt(now)
       })
@@ -36,9 +36,9 @@ exports.main = async (event, context) => {
       reduceMap[key].count += 1;
     });
     
-    // 3. 批量更新 user_status，减少对应的 total
+    // 3. 批量更新 status_records，减少对应的 total
     const updatePromises = Object.values(reduceMap).map(async (item) => {
-      await db.collection('user_status')
+      await db.collection('status_records')
         .where({
           _openid: item._openid,
           statusId: item.statusId
@@ -46,7 +46,8 @@ exports.main = async (event, context) => {
         .update({
           data: {
             total: _.inc(-item.count),
-            updateTime: now
+            updateTime: now,
+            isExpired: true
           }
         });
     });
@@ -56,11 +57,15 @@ exports.main = async (event, context) => {
     // 4. 删除已过期的记录
     const deleteIds = expiredRecords.data.map(r => r._id);
     // 注意：一次最多删除1000条，如果超过需要分批
-    await db.collection('status_records')
+    await db.collection('user_status')
       .where({
         _id: _.in(deleteIds.slice(0, 1000))
       })
-      .remove();
+      .update({
+        data: {
+          isExpired: true
+        }
+      });
     
     return {
       success: true,

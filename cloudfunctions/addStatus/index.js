@@ -17,10 +17,9 @@ exports.main = async (event, context) => {
     const transaction = await db.startTransaction();
     
     try {
-      // 3. 更新 user_status 中的 total + 1
-      const statusResult = await transaction.collection('user_status')
+      // 3. 更新 status_records 中的 total + 1
+      const statusResult = await transaction.collection('status_records')
         .where({
-          _openid: openid,
           statusId: statusId
         })
         .update({
@@ -32,7 +31,7 @@ exports.main = async (event, context) => {
       
       // 如果记录不存在，则创建
       if (statusResult.stats.updated === 0) {
-        await transaction.collection('user_status').add({
+        await transaction.collection('status_records').add({
           data: {
             statusId,
             statusName,
@@ -43,10 +42,12 @@ exports.main = async (event, context) => {
       }
       
       // 4. 在 status_records 中创建过期记录
-      await transaction.collection('status_records').add({
+      await transaction.collection('user_status').add({
         data: {
           openid,
           statusId,
+          statusName,
+          isExpired: false,
           expireTime,
           createdAt: now
         }

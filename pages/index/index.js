@@ -82,7 +82,7 @@ Page({
   initWatcher() {
     const db = wx.cloud.database();
 
-    this.watcher = db.collection('user_status')
+    this.watcher = db.collection('status_records')
       .watch({
         onChange: (snapshot) => {
           // 延迟更新，避免频繁刷新
@@ -107,7 +107,7 @@ Page({
       const now = new Date();
       const openId = app.globalData.openId;
       // 查询所有有效状态的用户（只取必要字段）
-      const result = await db.collection('user_status')
+      const result = await db.collection('status_records')
       .get();
       // 前端分组统计
       const countMap = {};
@@ -126,8 +126,8 @@ Page({
       // 获取当前用户状态
       let myStatus = null;
       if(openId){
-        const result = await db.collection('status_records')
-        .where({ openid: openId })
+        const result = await db.collection('user_status')
+        .where({ openid: openId, isExpired: false })
         .get();
         myStatus = result.data.length === 0 ? null : result.data[0].statusId;
       }
@@ -141,27 +141,50 @@ Page({
   },
   // 处理状态数据
   processStatusData(countData, myStatus) {
+    // 保存旧的排名数据（用于对比）
+    const oldStatusList = this.data.statusList || [];
+    const oldRankMap = {};
+    oldStatusList.forEach(item => {
+      oldRankMap[item.id] = item.rank;
+    });
+
     // 创建状态计数映射
     const countMap = {};
     countData.forEach(item => {
       countMap[item._id] = item.count;
     });
+    
     // 映射当前用户的状态
     const targetItem = STATUS_LIST.find(item => item.id === myStatus);
+    
     // 生成完整状态列表
     const statusList = STATUS_LIST.map((status, index) => ({
       ...status,
       count: countMap[status.id] || 0,
       isMine: status.id === myStatus,
-      rank: 0
+      rank: 0,
+      // 添加动画相关字段
+      oldRank: oldRankMap[status.id] || 999,
+      rankChange: 0, // 1=上升, -1=下降, 0=不变
+      isNew: !oldRankMap[status.id] // 是否新上榜
     }));
 
     // 按人数排序
     statusList.sort((a, b) => b.count - a.count);
 
-    // 添加排名
+    // 添加排名和排名变化
     statusList.forEach((item, index) => {
       item.rank = index + 1;
+      // 计算排名变化（注意：排名数字越小越靠前）
+      if (item.oldRank === 999) {
+        item.rankChange = 0; // 新上榜
+      } else if (item.rank < item.oldRank) {
+        item.rankChange = 1; // 排名上升
+      } else if (item.rank > item.oldRank) {
+        item.rankChange = -1; // 排名下降
+      } else {
+        item.rankChange = 0; // 不变
+      }
     });
 
     // 计算总人数
@@ -171,16 +194,29 @@ Page({
     const topThree = statusList.slice(0, 3);
     const restList = statusList.slice(3);
 
+    // 检测前三名是否有变化
+    const oldTopThree = this.data.topThree || [];
+    const topThreeChanged = topThree.some((item, index) => {
+      return !oldTopThree[index] || oldTopThree[index].id !== item.id;
+    });
+
     this.setData({
       statusList,
       topThree,
       restList,
       totalCount,
       myCurrentStatus: myStatus,
-      currentStatusInfo:targetItem || { name: '无', icon: '' }
+      currentStatusInfo: targetItem || { name: '无', icon: '' },
+      topThreeChanged, // 标记前三名是否变化
     });
-  },
 
+    // 如果前三名有变化，触发动画后重置标记
+    if (topThreeChanged) {
+      setTimeout(() => {
+        this.setData({ topThreeChanged: false });
+      }, 800);
+    }
+  },
   // 选择状态
   selectStatus(e) {
     const statusId = e.currentTarget.dataset.id;
