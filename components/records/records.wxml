@@ -1,9 +1,9 @@
 <!--pages/records/records.wxml-->
 <view class="container theme-{{theme}}">
-  <!-- 头部区域 -->
-  <view class="header">
-    <text class="title">我的记录</text>
-    <text class="subtitle" wx:if="{{totalRecords > 0}}">共{{totalRecords}}条记录</text>
+  <view class="top-navigation" style="width: 100%;height: {{buttonBoundingHeigth}}px;margin-top:{{buttonBoundingTop}}px;">
+    <view class="top-navigation-left" style="height: 100%;display: flex;align-items: center;justify-content: center;">
+      <text class="current-status-title">我的记录</text>
+    </view>
   </view>
 
   <!-- 滚动区域 -->
@@ -14,6 +14,7 @@
     show-scrollbar="{{false}}"
     bindscrolltolower="onLoadMore"
     lower-threshold="100"
+    style="margin-top: {{topNavigationheight}}px;"
   >
     <!-- 记录列表 -->
     <view class="records-container" wx:if="{{recordsByDate.length > 0}}">

@@ -10,7 +10,8 @@ exports.main = async (event, context) => {
     // 1. 查询所有已过期的记录
     const expiredRecords = await db.collection('user_status')
       .where({
-        expireTime: _.lt(now)
+        expireTime: _.lt(now),
+        isExpired: false
       })
       .get();
     console.log("记录：" + expiredRecords.data)

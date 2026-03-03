@@ -8,27 +8,15 @@
     background-color: var(--bg-primary);
     transition: background-color 0.3s ease;
   }
-  
+  .top-navigation{
+    position: fixed;
+    z-index: 999;
+  }
   /* 头部区域 */
   .header {
     padding: 24rpx 32rpx;
     background-color: var(--bg-primary);
   }
-  
-  .header .title {
-    display: block;
-    font-size: 36rpx;
-    font-weight: bold;
-    color: var(--text-primary);
-    margin-bottom: 8rpx;
-  }
-  
-  .header .subtitle {
-    display: block;
-    font-size: 28rpx;
-    color: var(--text-secondary);
-  }
-  
   /* 滚动区域 */
   .scroll-area {
     flex: 1;

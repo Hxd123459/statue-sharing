@@ -15,6 +15,11 @@ Component({
    * 组件的初始数据
    */
   data: {
+    topNavigationheight: app.globalData.topNavigationheight,
+    //胶囊体离顶部高度
+    buttonBoundingTop: app.globalData.buttonBoundingTop,
+    //胶囊体高度
+    buttonBoundingHeigth: app.globalData.buttonBoundingHeigth,
     theme: 'light',
     recordsByDate: [],
     totalRecords: 0,
@@ -86,7 +91,7 @@ Component({
           .skip(skip)
           .limit(pageSize)
           .get();
-
+        console.log("-----------------",res)
         // 处理数据
         const newRecords = this.processRecords(res.data);
         
@@ -124,8 +129,8 @@ Component({
     // 处理记录数据
     processRecords(records) {
       return records.map(record => {
-        const startTime = new Date(record.startTime);
-        const endTime = new Date(record.endTime);
+        const startTime = new Date(record.createdAt);
+        const endTime = new Date(record.expireTime);
         
         return {
           id: record._id,

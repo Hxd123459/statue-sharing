@@ -6,7 +6,7 @@
   --bg-card: #FFFFFF;
   --text-primary: #1A1A1A;
   --text-secondary: #8E8E93;
-  --accent-color: #6366F1;
+  --accent-color: #8B5CF6;
   --divider-color: #E5E5EA;
   --gold-gradient-start: #FFD700;
   --gold-gradient-end: #FFA500;
