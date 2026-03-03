@@ -2,6 +2,7 @@
   "usingComponents": {
     "tabbar": "/components/tabbar/tabbar",
     "duration-picker": "/components/duration-picker/duration-picker",
-    "status":"/components/status/status"
+    "status":"/components/status/status",
+    "records":"/components/records/records"
   }
 }

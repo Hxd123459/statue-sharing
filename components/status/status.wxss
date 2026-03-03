@@ -1,7 +1,5 @@
 /* pages/index/index.wxss */
 /* 顶部导航 */
-@import "../../app.wxss";
-
 .top-navigation{
     position: fixed;
     z-index: 999;

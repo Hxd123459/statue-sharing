@@ -10,6 +10,8 @@
   padding-bottom: 24rpx;
   z-index: 1000;
   pointer-events: none;
+  background-color: var(--bg-primary);
+  
 }
 
 .tabbar {
@@ -23,16 +25,18 @@
   box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
   pointer-events: auto;
   overflow: hidden;
+  padding-left: 10rpx;
+  padding-right: 10rpx;
 }
 
 /* 背景滑块 */
 .slider {
   position: absolute;
-  left: 0;
-  top: 50%;
+  /* left: 10rpx;
+  right: 10rpx; */
   transform: translateY(-50%);
   width: 340rpx;
-  height: 96rpx;
+  height: 100rpx;
   background: linear-gradient(135deg, var(--accent-color), #7c3aed);
   border-radius: 48rpx;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);

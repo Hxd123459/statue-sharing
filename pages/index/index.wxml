@@ -1,4 +1,6 @@
 <!--pages/index/index.wxml-->
 <view class="container">
-  <status/>  
+  <status wx:if="{{current == 0}}"/> 
+  <records wx:if="{{current == 1}}"/> 
+  <tabbar current="{{current}}" bind:change="onTabChange"/>
 </view>

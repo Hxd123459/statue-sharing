@@ -1,4 +1,5 @@
 // components/tabbar/tabbar.js
+const app = getApp();
 Component({
   properties: {
     current: {
@@ -7,7 +8,16 @@ Component({
     }
   },
 
-  data: {},
+  data: {
+    theme:'light'
+  },
+
+  lifetimes: {
+    attached() {
+      // 设置主题
+      this.setData({ theme: app.getTheme() });
+    }
+  },
 
   methods: {
     onTabClick(e) {

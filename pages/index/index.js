@@ -11,6 +11,7 @@ Page({
     //胶囊体高度
     buttonBoundingHeigth: app.globalData.buttonBoundingHeigth,
     theme: 'light',
+    current: 0,
     statusList: [],
     topThree: [],
     restList: [],
@@ -351,13 +352,9 @@ Page({
   // Tab切换
   onTabChange(e) {
     const current = e.detail.current;
-    console.log("=========",current)
-    if (current == 1) {
-      console.log("123123123123",current)
-      wx.navigateTo({
-        url: '/pages/records/records'
-      });
-    }
+    this.setData({
+      current: current
+    });
   },
 
   // 下拉刷新
