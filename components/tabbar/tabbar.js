@@ -9,6 +9,7 @@ Component({
   },
 
   data: {
+    currentTab:0,
     theme:'light'
   },
 

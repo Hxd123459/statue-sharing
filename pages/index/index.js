@@ -64,7 +64,6 @@ Page({
       if (openId) {
         app.globalData.openId = openId;
       }
-      console.log("++++++++++++++++++++++++",openId)
       // 加载状态数据
       await this.loadStatusCounts();
 

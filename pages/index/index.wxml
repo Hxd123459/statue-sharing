@@ -3,4 +3,9 @@
   <status wx:if="{{current == 0}}"/> 
   <records wx:if="{{current == 1}}"/> 
   <tabbar current="{{current}}" bind:change="onTabChange"/>
+  <duration-picker 
+    show="{{showDurationPicker}}"
+    bind:cancel="onDurationCancel"
+    bind:confirm="onDurationConfirm"
+  ></duration-picker>
 </view>
