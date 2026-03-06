@@ -1,6 +1,6 @@
 <!--components/duration-picker/duration-picker.wxml-->
 <view class="duration-picker-mask" wx:if="{{show}}" bindtap="onCancel" catchtouchmove="preventMove">
-  <view class="duration-picker-content" catchtap="stopPropagation">
+  <view class="duration-picker-content theme-{{theme}}" catchtap="stopPropagation">
     <view class="picker-header">
       <text class="picker-title">选择持续时间</text>
     </view>

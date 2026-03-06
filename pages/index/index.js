@@ -17,7 +17,6 @@ Page({
     restList: [],
     totalCount: 0,
     myCurrentStatus: null,
-    showDurationPicker: false,
     selectedStatusId: null,
     loading: true,
     currentStatusInfo:{},
@@ -233,7 +232,6 @@ Page({
 
       // 显示持续时间选择器
       this.setData({
-        showDurationPicker: true,
         selectedStatusId: statusId,
         selectedStatusName: STATUS_MAP[statusId]?.name
       });
@@ -295,59 +293,7 @@ Page({
       return { success: false, message: '检查失败，请重试' };
     }
   },
-
-  // 取消选择持续时间
-  onDurationCancel() {
-    this.setData({
-      showDurationPicker: false,
-      selectedStatusId: null
-    });
-  },
-
-  // 确认持续时间
-  async onDurationConfirm(e) {
-    const duration = e.detail.duration;
-    const statusId = this.data.selectedStatusId;
-    const statusName = this.data.selectedStatusName;
-    this.setData({
-      showDurationPicker: false,
-      loading: true
-    });
-
-    try {
-      // 调用云函数设置状态（必须与 app.js 中 wx.cloud.init 的 env 一致，否则会调错环境）
-      const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
-      const res = await wx.cloud.callFunction({
-        name: 'addStatus',
-        config: { env: envId },
-        data: {
-          statusId,
-          statusName,
-          duration
-        }
-      });
-      console.log('addStatus 调用完成', res.requestID);
-      // result 可能被平台合并为 event，不依赖 result，只要没 reject 就视为成功
-      wx.showToast({
-        title: '状态已更新',
-        icon: 'success'
-      });
-      await this.loadStatusCounts();
-    } catch (err) {
-      console.error('设置状态失败:', err);
-      const msg = (err.errObj && err.errObj.message) || err.result?.message || err.message || '设置失败';
-      wx.showToast({
-        title: String(msg),
-        icon: 'none'
-      });
-    } finally {
-      this.setData({
-        loading: false,
-        selectedStatusId: null
-      });
-    }
-  },
-
+  
   // Tab切换
   onTabChange(e) {
     const current = e.detail.current;

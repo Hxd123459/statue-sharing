@@ -26,10 +26,10 @@ Component({
     restList: [],
     totalCount: 0,
     myCurrentStatus: null,
-    showDurationPicker: false,
     selectedStatusId: null,
     loading: true,
     currentStatusInfo:{},
+    showDurationPicker: false,
   },
   watcher: null,
 
@@ -260,7 +260,7 @@ Component({
           selectedStatusId: statusId,
           selectedStatusName: STATUS_MAP[statusId]?.name
         });
-  
+        console.log("11111111111111111")
         // 触觉反馈
         wx.vibrateShort({ type: 'light' });
       });
@@ -382,6 +382,7 @@ Component({
         });
       }
     },
+
   
     // 下拉刷新
     async onPullDownRefresh() {

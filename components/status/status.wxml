@@ -88,9 +88,6 @@
     <view class="bottom-safe-area"></view>
   </scroll-view>
 
-  <!-- 自定义 TabBar -->
-  <tabbar current="0" bind:change="onTabChange"></tabbar>
-
   <!-- 持续时间选择器 -->
   <duration-picker 
     show="{{showDurationPicker}}"

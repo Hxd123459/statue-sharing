@@ -1,4 +1,5 @@
 // components/duration-picker/duration-picker.js
+const app = getApp();
 Component({
   properties: {
     show: {
@@ -8,8 +9,17 @@ Component({
   },
 
   data: {
-    selectedDuration: 30 // 默认30分钟
+    selectedDuration: 30, // 默认30分钟
+    theme:'light'
   },
+
+  lifetimes: {
+    attached() {
+      // 设置主题
+      this.setData({ theme: app.getTheme() });
+    }
+  },
+
 
   methods: {
     // 选择时长
