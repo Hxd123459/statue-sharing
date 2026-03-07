@@ -39,9 +39,9 @@ Component({
     },
     detached() {
       // 关闭实时监听
-      if (this.watcher) {
-        this.watcher.close();
-      }
+      // if (this.watcher) {
+      //   this.watcher.close();
+      // }
     },
   },
 
@@ -91,7 +91,6 @@ Component({
           .skip(skip)
           .limit(pageSize)
           .get();
-        console.log("-----------------",res)
         // 处理数据
         const newRecords = this.processRecords(res.data);
         

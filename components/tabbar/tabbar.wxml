@@ -1,5 +1,5 @@
 <!--components/tabbar/tabbar.wxml-->
-<view class="tabbar-container  safe-area-bottom ">
+<view class="tabbar-container">
   <view class="tabbar theme-{{theme}}" wx:if="{{currentTab == 0}}">
     <!-- 背景滑块 -->
     <view class="slider" style="transform: translateX({{current * 340}}rpx);"></view>

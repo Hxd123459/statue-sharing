@@ -7,6 +7,24 @@ exports.main = async (event, context) => {
   try {
     const now = new Date();
     console.log("开始执行清理过期状态函数")
+
+    // 0. 清理过期弹幕（danmus）：统一和状态过期放在一个函数里处理
+    try {
+      await db.collection('danmus')
+        .where({
+          expireTime: _.lt(now),
+          isExpired: _.neq(true)
+        })
+        .update({
+          data: {
+            isExpired: true,
+            expiredAt: now
+          }
+        });
+    } catch (e) {
+      console.error('清理过期弹幕失败:', e);
+    }
+
     // 1. 查询所有已过期的记录
     const expiredRecords = await db.collection('user_status')
       .where({

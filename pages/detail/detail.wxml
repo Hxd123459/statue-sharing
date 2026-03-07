@@ -1,0 +1,88 @@
+<view class="container theme-{{theme}}">
+  <!-- 弹幕层：从右向左滚动 -->
+  <view class="danmaku-layer" wx:if="{{danmakus.length}}">
+    <view
+      wx:for="{{danmakus}}"
+      wx:key="id"
+      class="danmaku-item"
+      style="top: {{item.topPx}}px; animation-duration: {{item.durationMs}}ms;"
+    >{{item.text}}</view>
+  </view>
+
+  <!-- 顶部：状态名称 + 图标 -->
+  <view class="top-navigation" style="width: 100%;height: {{buttonBoundingHeigth}}px;margin-top:{{buttonBoundingTop}}px;">
+    <view class="top-navigation-left" style="height: 100%;display: flex;align-items: center;justify-content: center;">
+      <text class="current-status-title">{{statusInfo.icon}} {{statusInfo.name}}</text>
+    </view>
+  </view>
+
+  <!-- 中上部：大图标 + 人数 -->
+  <view class="content-area">
+    <view class="icon-section">
+      <view class="big-icon-wrap">
+        <text class="big-icon">{{statusInfo.icon}}</text>
+      </view>
+      <view class="count-wrap">
+        <text class="count-num {{countAnimate ? 'count-animate' : ''}}">{{count}}</text>
+        <text class="count-unit">人</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部四个按钮 -->
+  <view class="tabbar-container">
+    <view class="tabbar">
+      <view class="tabbar-btn" bindtap="onBack">
+        <text class="tabbar-btn-icon">←</text>
+        <text class="tabbar-btn-text">返回</text>
+      </view>
+      <view class="tabbar-btn" bindtap="onDanmaku">
+        <text class="tabbar-btn-icon">💬</text>
+        <text class="tabbar-btn-text">弹幕</text>
+      </view>
+      <view class="tabbar-btn primary" bindtap="onTouch">
+        <text class="tabbar-btn-icon">👋</text>
+        <text class="tabbar-btn-text">碰一下</text>
+      </view>
+      <view class="tabbar-btn" bindtap="onTime">
+        <text class="tabbar-btn-icon">⏱</text>
+        <text class="tabbar-btn-text">时间</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 时间选择器 -->
+  <duration-picker
+    show="{{showDurationPicker}}"
+    bind:cancel="onDurationCancel"
+    bind:confirm="onDurationConfirm"
+  />
+
+  <!-- 弹幕弹框（样式与时间选择器一致） -->
+  <view class="danmaku-mask" wx:if="{{showDanmakuPicker}}" bindtap="onDanmakuCancel" catchtouchmove="preventMove">
+    <view class="danmaku-content theme-{{theme}}" catchtap="stopPropagation">
+      <view class="picker-header">
+        <text class="picker-title">选择弹幕</text>
+      </view>
+
+      <scroll-view class="danmaku-options" scroll-y enhanced show-scrollbar="{{false}}">
+        <view
+          wx:for="{{danmakuOptions}}"
+          wx:key="index"
+          class="danmaku-option {{selectedDanmakuIndex === index ? 'active' : ''}}"
+          bindtap="onDanmakuSelect"
+          data-index="{{index}}"
+          data-text="{{item}}"
+        >
+          <text class="option-label">{{item}}</text>
+          <text class="option-check" wx:if="{{selectedDanmakuIndex === index}}">✓</text>
+        </view>
+      </scroll-view>
+
+      <view class="picker-actions">
+        <button class="btn-cancel" bindtap="onDanmakuCancel">取消</button>
+        <button class="btn-confirm" bindtap="onDanmakuConfirm">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

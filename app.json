@@ -1,7 +1,7 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/records/records"
+    "pages/detail/detail"
   ],
   "window": {
     "navigationStyle": "custom"

@@ -256,11 +256,13 @@ Component({
   
         // 显示持续时间选择器
         this.setData({
-          showDurationPicker: true,
+          // showDurationPicker: true,
           selectedStatusId: statusId,
           selectedStatusName: STATUS_MAP[statusId]?.name
         });
-        console.log("11111111111111111")
+        wx.navigateTo({
+          url: '/pages/detail/detail?selectedStatusId=' + statusId,
+        })
         // 触觉反馈
         wx.vibrateShort({ type: 'light' });
       });

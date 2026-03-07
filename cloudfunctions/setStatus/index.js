@@ -18,7 +18,6 @@ const STATUS_MAP = {
     const { statusId, duration } = event;
   
     try {
-      console.log("openId------------------", openId);
       const now = new Date();
       const endTime = new Date(now.getTime() + duration * 60 * 1000);
   

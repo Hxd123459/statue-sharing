@@ -3,4 +3,5 @@
   <status wx:if="{{current == 0}}"/> 
   <records wx:if="{{current == 1}}"/> 
   <tabbar current="{{current}}" bind:change="onTabChange"/>
+  <detail wx:if="{{current == 6}}"/>
 </view>
