@@ -9,6 +9,18 @@
     >{{item.text}}</view>
   </view>
 
+  <!-- 碰一下图标碰撞动画遮罩 -->
+  <view wx:if="{{showCollisionMask}}" class="collision-mask">
+    <view class="collision-scene {{collisionStage}}">
+      <view class="collision-icon collision-icon-left">
+        <text class="collision-emoji">{{statusInfo.icon}}</text>
+      </view>
+      <view class="collision-icon collision-icon-right">
+        <text class="collision-emoji">{{statusInfo.icon}}</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 顶部：状态名称 + 图标 -->
   <view class="top-navigation" style="width: 100%;height: {{buttonBoundingHeigth}}px;margin-top:{{buttonBoundingTop}}px;">
     <view class="top-navigation-left" style="height: 100%;display: flex;align-items: center;justify-content: center;">
@@ -34,18 +46,18 @@
     <view class="tabbar">
       <view class="tabbar-btn" bindtap="onBack">
         <text class="tabbar-btn-icon">←</text>
-        <text class="tabbar-btn-text">返回</text>
+        <text class="tabbar-btn-text"></text>
       </view>
       <view class="tabbar-btn" bindtap="onDanmaku">
-        <text class="tabbar-btn-icon">💬</text>
+        <text class="tabbar-btn-icon"></text>
         <text class="tabbar-btn-text">弹幕</text>
       </view>
       <view class="tabbar-btn primary" bindtap="onTouch">
-        <text class="tabbar-btn-icon">👋</text>
+        <text class="tabbar-btn-icon"></text>
         <text class="tabbar-btn-text">碰一下</text>
       </view>
       <view class="tabbar-btn" bindtap="onTime">
-        <text class="tabbar-btn-icon">⏱</text>
+        <text class="tabbar-btn-icon"></text>
         <text class="tabbar-btn-text">时间</text>
       </view>
     </view>

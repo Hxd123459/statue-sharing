@@ -1,5 +1,5 @@
 /* app.wxss - 全局样式 */
-
+@import '/utils/font.wxss';
 /* 白天主题 */
 .theme-light {
   --bg-primary: #F5F7FA;

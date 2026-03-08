@@ -24,12 +24,15 @@ Page({
     danmakuTopMinPx: 120,
     danmakuTopMaxPx: 380,
     loading: false,
+    showCollisionMask: false,
+    collisionStage: '',
   },
 
   watcher: null,
   danmuWatcher: null,
   danmuSeenMap: null,
   danmuRefreshTimer: null,
+  collisionBusy: false,
 
   onLoad(options) {
     const id = options.selectedStatusId ? Number(options.selectedStatusId) : null;
@@ -209,6 +212,7 @@ Page({
       return;
     }
 
+    this.startCollisionAnimation();
     this.setData({ loading: true });
     try {
       const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
@@ -221,7 +225,7 @@ Page({
           duration: selectedDuration,
         },
       });
-      wx.showToast({ title: '状态已更新', icon: 'success' });
+      // wx.showToast({ title: '状态已更新', icon: 'success' });
       await this.loadCount();
 
       // 1) 先本地发一条弹幕（即时反馈）
@@ -255,6 +259,49 @@ Page({
     }
   },
 
+  startCollisionAnimation() {
+    if (this.data.collisionBusy) return;
+
+    this.setData({
+      showCollisionMask: true,
+      collisionStage: '',
+      collisionBusy: true,
+    });
+
+    // 1. 冲向中心
+    setTimeout(() => {
+      this.setData({ collisionStage: 'go' });
+    }, 10);
+
+    // 2. 撞住 + 符号弹出 + 震动
+    setTimeout(() => {
+      this.setData({ collisionStage: 'hit' });
+      try {
+        wx.vibrateShort({ type: 'medium' });
+      } catch (e) {
+        // ignore
+      }
+    }, 160);
+
+    // 3. 回弹
+    setTimeout(() => {
+      this.setData({ collisionStage: 'rebound' });
+    }, 400);
+
+    // 4. 停在回弹位，稍作停留后关闭遮罩
+    setTimeout(() => {
+      this.setData({ collisionStage: 'done' });
+    }, 640);
+
+    setTimeout(() => {
+      this.setData({
+        showCollisionMask: false,
+        collisionStage: '',
+        collisionBusy: false,
+      });
+    }, 950);
+  },
+
   async loadAndPlayActiveDanmus({ spread }) {
     const { selectedStatusId } = this.data;
     if (selectedStatusId == null) return;
@@ -267,7 +314,7 @@ Page({
         .where({
           statusId: selectedStatusId,
           expireTime: _.gt(now),
-          isExpired: _.neq(true),
+          isExpired: false,
         })
         .orderBy('createdAt', 'asc')
         .limit(50)

@@ -13,7 +13,7 @@ exports.main = async (event, context) => {
       await db.collection('danmus')
         .where({
           expireTime: _.lt(now),
-          isExpired: _.neq(true)
+          isExpired: false
         })
         .update({
           data: {

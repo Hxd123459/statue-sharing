@@ -168,6 +168,142 @@
   font-weight: 600;
 }
 
+/* 碰一下碰撞动画遮罩 */
+.collision-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+.collision-scene {
+  position: relative;
+  width: 680rpx;
+  height: 360rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collision-icon {
+  position: absolute;
+  width: 176rpx;
+  height: 176rpx;
+  border-radius: 36rpx;
+  background: linear-gradient(135deg, var(--accent-color, #8b5cf6), #7c3aed);
+  box-shadow: 0 16rpx 48rpx rgba(139, 92, 246, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.collision-icon-left {
+  left: 40rpx;
+}
+
+.collision-icon-right {
+  right: 40rpx;
+}
+
+.collision-emoji {
+  font-size: 80rpx;
+}
+
+/* 冲向中心 */
+.collision-scene.go .collision-icon-left {
+  animation: collision-hit-right 0.15s cubic-bezier(0.8, 0, 1, 1) forwards;
+}
+
+.collision-scene.go .collision-icon-right {
+  animation: collision-hit-left 0.15s cubic-bezier(0.8, 0, 1, 1) forwards;
+}
+
+@keyframes collision-hit-right {
+  from { transform: translateY(-50%) translateX(0); }
+  /* 124rpx ≈ 让两侧图标在中心刚好贴边、不重叠 */
+  to   { transform: translateY(-50%) translateX(124rpx); }
+}
+
+@keyframes collision-hit-left {
+  from { transform: translateY(-50%) translateX(0); }
+  to   { transform: translateY(-50%) translateX(-124rpx); }
+}
+
+/* 撞住停留位置（不复原） */
+.collision-scene.hit .collision-icon-left {
+  transform: translateY(-50%) translateX(124rpx);
+}
+
+.collision-scene.hit .collision-icon-right {
+  transform: translateY(-50%) translateX(-124rpx);
+}
+
+/* 回弹：稍微拉开一点距离 */
+.collision-scene.rebound .collision-icon-left {
+  animation: collision-rebound-left 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.collision-scene.rebound .collision-icon-right {
+  animation: collision-rebound-right 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes collision-rebound-left {
+  from { transform: translateY(-50%) translateX(124rpx); }
+  to   { transform: translateY(-50%) translateX(104rpx); }
+}
+
+@keyframes collision-rebound-right {
+  from { transform: translateY(-50%) translateX(-124rpx); }
+  to   { transform: translateY(-50%) translateX(-104rpx); }
+}
+
+/* 回弹后保持在回弹位置 */
+.collision-scene.done .collision-icon-left {
+  transform: translateY(-50%) translateX(104rpx);
+}
+
+.collision-scene.done .collision-icon-right {
+  transform: translateY(-50%) translateX(-104rpx);
+}
+
+/* 爆裂三角符号容器 */
+.collision-burst {
+  position: absolute;
+  /* 稍微靠近顶部，让爆炸明显在两图标之上 */
+  top: 10rpx;
+  left: 50%;
+  width: 240rpx;
+  height: 190rpx;
+  transform: translateX(-50%) scale(0);
+  transform-origin: bottom center;
+  opacity: 0;
+}
+
+@keyframes collision-pop {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.05); }
+  65%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* 回弹时爆裂消散 */
+.collision-scene.rebound .collision-burst,
+.collision-scene.done .collision-burst {
+  animation: collision-pop-out 0.15s ease forwards;
+}
+
+@keyframes collision-pop-out {
+  from { opacity: 1; transform: translateX(-50%) scale(1); }
+  to   { opacity: 0; transform: translateX(-50%) scale(1.3); }
+}
 /* 弹幕弹框（与 duration-picker 风格一致） */
 .danmaku-mask {
   position: fixed;
