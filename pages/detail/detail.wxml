@@ -29,7 +29,7 @@
   </view>
 
   <!-- 中上部：大图标 + 人数 -->
-  <view class="content-area">
+  <view class="content-area" bindtap="onTouch">
     <view class="icon-section">
       <view class="big-icon-wrap">
         <text class="big-icon">{{statusInfo.icon}}</text>
@@ -45,21 +45,22 @@
   <view class="tabbar-container">
     <view class="tabbar">
       <view class="tabbar-btn" bindtap="onBack">
-        <text class="tabbar-btn-icon">←</text>
-        <text class="tabbar-btn-text"></text>
+        <text class="tabbar-btn-icon iconfont icon-fanhui"/>
+        <text class="tabbar-btn-text">返回</text>
       </view>
       <view class="tabbar-btn" bindtap="onDanmaku">
-        <text class="tabbar-btn-icon"></text>
+        <text class="tabbar-btn-icon iconfont icon-danmu"/>
         <text class="tabbar-btn-text">弹幕</text>
       </view>
-      <view class="tabbar-btn primary" bindtap="onTouch">
-        <text class="tabbar-btn-icon"></text>
-        <text class="tabbar-btn-text">碰一下</text>
-      </view>
       <view class="tabbar-btn" bindtap="onTime">
-        <text class="tabbar-btn-icon"></text>
+        <text class="tabbar-btn-icon iconfont icon-shijian"/>
         <text class="tabbar-btn-text">时间</text>
       </view>
+      <view class="tabbar-btn" bindtap="onNearby">
+        <text class="tabbar-btn-icon iconfont icon-a-139-fujin"/>
+        <text class="tabbar-btn-text">区域</text>
+      </view>
+      
     </view>
   </view>
 

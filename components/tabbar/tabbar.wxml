@@ -13,15 +13,6 @@
       <text class="icon"></text>
       <text class="label">碰状态</text>
     </view>
-
-    <!-- <view 
-      class="tab-item {{current === 1 ? 'active' : ''}}"
-      bindtap="onTabClick"
-      data-index="1"
-    >
-      <text class="icon"></text>
-      <text class="label">碰心情</text>
-    </view> -->
     
     <view 
       class="tab-item {{current === 1 ? 'active' : ''}}"

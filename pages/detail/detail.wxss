@@ -1,5 +1,4 @@
 /* pages/detail/detail.wxss */
-
 .container {
   width: 100%;
   min-height: 100vh;
@@ -156,11 +155,12 @@
 .tabbar-btn-icon {
   font-size: 40rpx;
   margin-bottom: 4rpx;
+  color: var(--text-secondary);
 }
 
 .tabbar-btn-text {
   font-size: 22rpx;
-  color: var(--text-secondary, #666);
+  color: var(--text-secondary);
 }
 
 .tabbar-btn.primary .tabbar-btn-text {

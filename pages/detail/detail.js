@@ -186,6 +186,62 @@ Page({
     this.setData({ showDurationPicker: true });
   },
 
+  onNearby() {
+    wx.getLocation({
+      type: 'wgs84', // 或者 'gcj02'，返回坐标系类型
+      altitude: true, // 传入 true 会解析速度，但在部分安卓机型可能无效
+      success: (res) => {
+        console.log('=== 定位成功 ===');
+        console.log('纬度:', res.latitude);
+        console.log('经度:', res.longitude);
+        console.log('速度:', res.speed);
+        console.log('精度:', res.accuracy);
+        console.log('高度:', res.altitude);
+        console.log('垂直精度:', res.verticalAccuracy);
+        console.log('水平精度:', res.horizontalAccuracy);
+        
+        // 更新数据到页面（可选）
+        this.setData({ locationInfo: res });
+      },
+      fail: (err) => {
+        console.error('=== 定位失败 ===', err);
+        
+        // 错误码 12: 用户拒绝授权
+        // 错误码 6: 没有权限（可能之前拒绝了且没去设置页开）
+        if (err.errMsg.includes('fail auth deny') || err.errCode === 12 || err.errCode === 6) {
+          wx.showModal({
+            title: '提示',
+            content: '您已拒绝定位权限，需要手动开启才能使用此功能。是否前往设置？',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                // 引导用户打开设置页
+                wx.openSetting({
+                  success: (settingRes) => {
+                    if (settingRes.authSetting['scope.userLocation']) {
+                      wx.showToast({ title: '授权成功', icon: 'success' });
+                      // 用户开启后，再次尝试获取定位
+                      this.startLocation();
+                    } else {
+                      wx.showToast({ title: '仍未授权', icon: 'none' });
+                    }
+                  },
+                  fail: () => {
+                    console.log('打开设置页失败');
+                  }
+                });
+              }
+            }
+          });
+        } else {
+          wx.showToast({
+            title: '定位失败，请检查GPS',
+            icon: 'none'
+          });
+        }
+      }
+    });
+  },
+
   onDurationCancel() {
     this.setData({ showDurationPicker: false });
   },
