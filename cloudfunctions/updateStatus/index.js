@@ -8,7 +8,6 @@ exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const { userStatusId, statusRecordsId } = event;
   const now = new Date();
-  console.log("------",statusRecordsId)
   try {
     await db.collection('status_records')
       .doc(statusRecordsId)

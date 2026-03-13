@@ -72,8 +72,6 @@ Page({
     this.loadAndPlayActiveDanmus({ spread: true });
     this.initDanmuWatcher();
     this.startDanmuRefreshTimer();
-
-    this.test();
   },
 
   onUnload() {
@@ -319,7 +317,6 @@ Page({
     }
     // 检查是否已有相同/不同的进行中状态
     const sameOrDifferent = await this.expirePreviousStatusIfNeeded(selectedStatusId);
-    console.log("----------------",sameOrDifferent)
     if (sameOrDifferent && sameOrDifferent.sameStatus) {
       wx.showToast({
         title: '当前已是这个状态~',
@@ -491,8 +488,6 @@ Page({
       const oldStatusIds = Array.from(
         new Set(currentList.map(r => r.statusId).filter(id => id !== newStatusId))
       );
-      console.log("++++++++++++",oldStatusIds)
-      console.log("statusId值:", oldStatusIds[0], "类型:", typeof oldStatusIds[0]);
       if (oldStatusIds.length > 0) {
         const us = await db.collection('user_status')
         .where({
@@ -640,26 +635,4 @@ Page({
       return { success: false, message: '检查失败，请重试' };
     }
   },
-
-  async test(){
-    const db = wx.cloud.database();
-    try {
-      // 2. 在 .get() 前加上 await，等待数据返回
-      const res = await db.collection('user_status').where({
-        openid: "oRkpR3b2UrzF6lqKj7NN5B81rXaM",
-        isExpired: false,
-        statusId: Number("1")
-      }).get();
-
-      // 此时 res 才是真正的结果对象
-      console.log("00000000001", res); 
-      console.log("00000000000", res.data); // 这里就能打印出数组了
-      
-      if (res.data.length > 0) {
-        console.log("查询到的第一条数据:", res.data[0]);
-      }
-    } catch (err) {
-      console.error("查询失败:", err);
-    }
-  }
 });

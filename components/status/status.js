@@ -376,9 +376,7 @@ Component({
     // Tab切换
     onTabChange(e) {
       const current = e.detail.current;
-      console.log("=========",current)
       if (current == 1) {
-        console.log("123123123123",current)
         wx.navigateTo({
           url: '/pages/records/records'
         });

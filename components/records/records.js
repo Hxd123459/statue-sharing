@@ -38,10 +38,6 @@ Component({
       this.loadRecords();
     },
     detached() {
-      // 关闭实时监听
-      // if (this.watcher) {
-      //   this.watcher.close();
-      // }
     },
   },
 
