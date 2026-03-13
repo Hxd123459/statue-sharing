@@ -93,16 +93,18 @@ Component({
           .get();
         // 处理数据
         const newRecords = this.processRecords(res.data);
-        
-        // 合并数据
-        let allRecords;
-        if (isRefresh) {
-          allRecords = newRecords;
-        } else {
-          allRecords = [...this.data.recordsByDate, ...newRecords];
-        }
 
-        // 按日期重新分组
+        // 先把当前已经分好组的记录打平，再追加新记录，最后重新分组
+        const existingRecords = isRefresh
+          ? []
+          : (this.data.recordsByDate || []).reduce((acc, group) => {
+              if (group && Array.isArray(group.records)) {
+                return acc.concat(group.records);
+              }
+              return acc;
+            }, []);
+        const allRecords = existingRecords.concat(newRecords);
+
         const recordsByDate = this.groupByDate(allRecords);
 
         // 计算总记录数
@@ -127,15 +129,16 @@ Component({
 
     // 处理记录数据
     processRecords(records) {
-      return records.map(record => {
+        return records.map(record => {
         const startTime = new Date(record.createdAt);
         const endTime = new Date(record.expireTime);
         
-        return {
+          return {
           id: record._id,
           statusId: record.statusId,
           statusName: record.statusName,
           icon: STATUS_MAP[record.statusId]?.icon || '❓',
+            hasLocation: typeof record.lat === 'number' && typeof record.lng === 'number',
           startTime: startTime,
           endTime: endTime,
           startTimeStr: this.formatTime(startTime),

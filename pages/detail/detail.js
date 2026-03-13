@@ -26,6 +26,9 @@ Page({
     loading: false,
     showCollisionMask: false,
     collisionStage: '',
+    locationInfo: null,
+    nearbyCount: null,
+    nearbySummary: '',
   },
 
   watcher: null,
@@ -69,6 +72,8 @@ Page({
     this.loadAndPlayActiveDanmus({ spread: true });
     this.initDanmuWatcher();
     this.startDanmuRefreshTimer();
+
+    this.test();
   },
 
   onUnload() {
@@ -200,8 +205,13 @@ Page({
         console.log('垂直精度:', res.verticalAccuracy);
         console.log('水平精度:', res.horizontalAccuracy);
         
-        // 更新数据到页面（可选）
+        // 保存定位信息
         this.setData({ locationInfo: res });
+        // 基于当前位置统计附近的同状态用户
+        const { selectedStatusId } = this.data;
+        if (selectedStatusId != null) {
+          this.updateNearbyStats(res.latitude, res.longitude, selectedStatusId);
+        }
       },
       fail: (err) => {
         console.error('=== 定位失败 ===', err);
@@ -242,6 +252,46 @@ Page({
     });
   },
 
+  // 计算附近 500m 内同状态用户数量（基于 user_status 中的位置信息）
+  async updateNearbyStats(lat, lng, statusId) {
+    try {
+      const db = wx.cloud.database();
+      const _ = db.command;
+
+      const res = await db.collection('user_status')
+        .where({
+          statusId,
+          isExpired: false,
+          lat: _.gt(0),
+          lng: _.gt(0),
+        })
+        .limit(100)
+        .get();
+
+      const list = res.data || [];
+      const nearby = list.filter(item => {
+        if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return false;
+        const d = this.computeDistanceMeters(lat, lng, item.lat, item.lng);
+        return d <= 500;
+      });
+
+      const count = nearby.length;
+      let summary = '';
+      if (count > 0) {
+        summary = `附近有 ${count} 人也在${this.data.statusInfo.name || ''}`;
+      } else {
+        summary = '附近暂时没有同样状态的人';
+      }
+
+      this.setData({
+        nearbyCount: count,
+        nearbySummary: summary,
+      });
+    } catch (err) {
+      console.error('统计附近用户失败:', err);
+    }
+  },
+
   onDurationCancel() {
     this.setData({ showDurationPicker: false });
   },
@@ -255,7 +305,7 @@ Page({
   },
 
   async onTouch() {
-    const { selectedStatusId, statusInfo, selectedDuration, loading } = this.data;
+    const { selectedStatusId, statusInfo, selectedDuration, loading, locationInfo } = this.data;
     if (selectedStatusId == null || !statusInfo.name) {
       wx.showToast({ title: '状态异常', icon: 'none' });
       return;
@@ -267,12 +317,22 @@ Page({
       wx.showToast({ title: canUpdate.message, icon: 'none', duration: 2000 });
       return;
     }
+    // 检查是否已有相同/不同的进行中状态
+    const sameOrDifferent = await this.expirePreviousStatusIfNeeded(selectedStatusId);
+    console.log("----------------",sameOrDifferent)
+    if (sameOrDifferent && sameOrDifferent.sameStatus) {
+      wx.showToast({
+        title: '当前已是这个状态~',
+        icon: 'none',
+      });
+      return;
+    }
 
     this.startCollisionAnimation();
     this.setData({ loading: true });
     try {
       const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
-      await wx.cloud.callFunction({
+      const addRes = await wx.cloud.callFunction({
         name: 'addStatus',
         config: { env: envId },
         data: {
@@ -281,13 +341,38 @@ Page({
           duration: selectedDuration,
         },
       });
-      // wx.showToast({ title: '状态已更新', icon: 'success' });
       await this.loadCount();
+
+      // 写入位置信息到 user_status（如果有定位）
+      try {
+        const loc = locationInfo;
+        if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+          const db = wx.cloud.database();
+          const openId = app.globalData.openId;
+          if (openId) {
+            const latest = await db.collection('user_status')
+              .where({ openid: openId, statusId: selectedStatusId, isExpired: false })
+              .orderBy('createdAt', 'desc')
+              .limit(1)
+              .get();
+            if (latest.data.length > 0) {
+              await db.collection('user_status').doc(latest.data[0]._id).update({
+                data: {
+                  lat: loc.latitude,
+                  lng: loc.longitude,
+                },
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.error('写入 user_status 坐标失败:', e);
+      }
 
       // 1) 先本地发一条弹幕（即时反馈）
       this.pushDanmaku(this.data.danmakuText);
 
-      // 2) 再写入数据库 danmus（openId、statusId、danmuContent、expireTime）
+      // 2) 再写入数据库 danmus（不再存坐标，坐标在 user_status 中）
       try {
         const db = wx.cloud.database();
         const openId = app.globalData.openId;
@@ -356,6 +441,96 @@ Page({
         collisionBusy: false,
       });
     }, 950);
+  },
+
+  // Haversine 计算两点间距离（单位：米）
+  computeDistanceMeters(lat1, lng1, lat2, lng2) {
+    const toRad = (d) => d * Math.PI / 180;
+    const R = 6371000; // 地球半径（米）
+    const φ1 = toRad(lat1);
+    const φ2 = toRad(lat2);
+    const Δφ = toRad(lat2 - lat1);
+    const Δλ = toRad(lng2 - lng1);
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2)
+      + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  },
+
+  // 失效之前的状态：
+  // - 如果已经存在同一个 statusId 的未过期记录：sameStatus=true，用于阻止重复点击
+  // - 如果只有不同的 statusId：将这些旧状态设为过期，并同步失效该用户在这些状态下的未过期弹幕
+  async expirePreviousStatusIfNeeded(newStatusId) {
+    try {
+      const openId = app.globalData.openId;
+      if (!openId) return null;
+
+      const db = wx.cloud.database();
+      const _ = db.command;
+      const now = new Date();
+
+      // 查询当前用户所有未过期状态
+      const res = await db.collection('user_status')
+        .where({
+          openid: openId,
+          isExpired: false,
+        })
+        .get();
+
+      const currentList = res.data || [];
+      if (currentList.length === 0) return { sameStatus: false };
+
+      // 如果已经有同 statusId 的未过期记录，认为是同状态重复点击
+      const hasSame = currentList.some(r => r.statusId === newStatusId);
+      if (hasSame) {
+        return { sameStatus: true };
+      }
+
+      // 只处理不同状态的未过期记录：全部直接过期
+      const oldStatusIds = Array.from(
+        new Set(currentList.map(r => r.statusId).filter(id => id !== newStatusId))
+      );
+      console.log("++++++++++++",oldStatusIds)
+      console.log("statusId值:", oldStatusIds[0], "类型:", typeof oldStatusIds[0]);
+      if (oldStatusIds.length > 0) {
+        const us = await db.collection('user_status')
+        .where({
+          openid: openId,
+          isExpired: false,
+          statusId: oldStatusIds[0],
+        })
+        .get();
+        console.log("user_status查询结果:", JSON.stringify(us.data));
+        const sr = await db.collection('status_records')
+        .where({ statusId: oldStatusIds[0] })
+        .get();
+        console.log("status_records查询结果:", JSON.stringify(sr.data));
+        
+        const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
+        const addRes = await wx.cloud.callFunction({
+          name: 'updateStatus',
+          config: { env: envId },
+          data: {
+            statusRecordsId: sr.data[0]._id,
+            userStatusId: us.data[0]._id
+          },
+        });
+          
+       
+        await db.collection('danmus')
+          .where({
+            openId,
+            statusId: oldStatusIds[0],
+            isExpired: false,
+          })
+          .remove();
+      }
+      return { sameStatus: false };
+    } catch (err) {
+      console.error('处理上一状态失败:', err);
+      return { sameStatus: false };
+    }
   },
 
   async loadAndPlayActiveDanmus({ spread }) {
@@ -465,4 +640,26 @@ Page({
       return { success: false, message: '检查失败，请重试' };
     }
   },
+
+  async test(){
+    const db = wx.cloud.database();
+    try {
+      // 2. 在 .get() 前加上 await，等待数据返回
+      const res = await db.collection('user_status').where({
+        openid: "oRkpR3b2UrzF6lqKj7NN5B81rXaM",
+        isExpired: false,
+        statusId: Number("1")
+      }).get();
+
+      // 此时 res 才是真正的结果对象
+      console.log("00000000001", res); 
+      console.log("00000000000", res.data); // 这里就能打印出数组了
+      
+      if (res.data.length > 0) {
+        console.log("查询到的第一条数据:", res.data[0]);
+      }
+    } catch (err) {
+      console.error("查询失败:", err);
+    }
+  }
 });

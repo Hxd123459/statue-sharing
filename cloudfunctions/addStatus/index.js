@@ -6,7 +6,7 @@ const _ = db.command;
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const { statusId, statusName, duration } = event;
-  const openid = wxContext.OPENID;
+  const openId = wxContext.OPENID;
   
   try {
     // 1. 计算过期时间
@@ -44,7 +44,7 @@ exports.main = async (event, context) => {
       // 4. 在 status_records 中创建过期记录
       await transaction.collection('user_status').add({
         data: {
-          openid,
+          openId,
           statusId,
           statusName,
           isExpired: false,

@@ -37,6 +37,7 @@
               <view class="record-header">
                 <text class="emoji">{{record.icon}}</text>
                 <text class="status-name">{{record.statusName}}</text>
+                <text wx:if="{{record.hasLocation}}" class="location-badge iconfont icon-a-139-fujin"></text>
               </view>
               
               <view class="record-time">

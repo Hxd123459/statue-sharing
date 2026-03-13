@@ -95,6 +95,42 @@
   color: var(--text-secondary, #666);
 }
 
+.nearby-wrap {
+  margin-top: 16rpx;
+}
+
+.nearby-text {
+  font-size: 26rpx;
+  color: var(--text-secondary, #666);
+}
+
+.tap-hint {
+  margin-top: 20rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.tap-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--accent-color);
+  animation: tapDotPulse 1.4s ease-in-out infinite;
+}
+
+.tap-hint-text {
+  font-size: 24rpx;
+  color: var(--text-secondary, #666);
+}
+
+@keyframes tapDotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
 .count-animate {
   animation: countChange 0.5s ease-out;
 }

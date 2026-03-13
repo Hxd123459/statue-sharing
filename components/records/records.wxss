@@ -53,18 +53,20 @@
     opacity: 0.6;
   }
   
-  /* 记录列表 */
+  /* 记录列表：改为多列网格（默认三列，自适应换行） */
   .record-list {
     display: flex;
-    flex-direction: column;
-    gap: 12rpx;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8rpx;
   }
   
-  /* 记录卡片 */
+  /* 记录卡片：每行显示三个（在大屏上更紧凑） */
   .record-card {
+    width: calc(33.33% - 40rpx);
     background-color: var(--bg-card);
     border-radius: 16rpx;
-    padding: 24rpx;
+    padding: 14rpx;
     box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
     transition: all 0.2s ease;
   }
@@ -77,18 +79,19 @@
   .record-main {
     display: flex;
     flex-direction: column;
-    gap: 12rpx;
+    gap: 8rpx;
   }
   
   /* 记录头部 */
   .record-header {
     display: flex;
     align-items: center;
-    gap: 12rpx;
+    gap: 8rpx;
+    flex-wrap: nowrap;
   }
   
   .record-header .emoji {
-    font-size: 48rpx;
+    font-size: 40rpx;
   }
   
   .record-header .status-name {
@@ -97,9 +100,15 @@
     color: var(--text-primary);
   }
   
+  .location-badge {
+    margin-left: auto;
+    font-size: 28rpx;
+    color: var(--accent-color);
+  }
+  
   /* 时间信息 */
   .record-time {
-    padding-left: 60rpx;
+    padding-left: 0;
   }
   
   .time-text {
@@ -109,7 +118,7 @@
   
   /* 持续时长 */
   .record-duration {
-    padding-left: 60rpx;
+    padding-left: 0;
   }
   
   .duration-text {

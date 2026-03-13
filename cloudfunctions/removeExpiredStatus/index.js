@@ -15,12 +15,7 @@ exports.main = async (event, context) => {
           expireTime: _.lt(now),
           isExpired: false
         })
-        .update({
-          data: {
-            isExpired: true,
-            expiredAt: now
-          }
-        });
+        .remove();
     } catch (e) {
       console.error('清理过期弹幕失败:', e);
     }
@@ -66,7 +61,6 @@ exports.main = async (event, context) => {
           data: {
             total: _.inc(-item.count),
             updateTime: now,
-            isExpired: true
           }
         });
     });

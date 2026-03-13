@@ -38,6 +38,13 @@
         <text class="count-num {{countAnimate ? 'count-animate' : ''}}">{{count}}</text>
         <text class="count-unit">人</text>
       </view>
+      <view class="nearby-wrap" wx:if="{{nearbySummary}}">
+        <text class="nearby-text">{{nearbySummary}}</text>
+      </view>
+      <view class="tap-hint">
+        <view class="tap-dot"></view>
+        <text class="tap-hint-text">点击上方图标发起「碰一下」并记录你的位置</text>
+      </view>
     </view>
   </view>
 
@@ -58,7 +65,7 @@
       </view>
       <view class="tabbar-btn" bindtap="onNearby">
         <text class="tabbar-btn-icon iconfont icon-a-139-fujin"/>
-        <text class="tabbar-btn-text">区域</text>
+        <text class="tabbar-btn-text">附近</text>
       </view>
       
     </view>
