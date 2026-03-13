@@ -205,6 +205,22 @@ Page({
         
         // 保存定位信息
         this.setData({ locationInfo: res });
+        // 更新用户当前位置到 user_status
+        const db = wx.cloud.database();
+        const _ = db.command;
+        const openId = app.globalData.openId;
+        const us = db.collection('user_status')
+        .where({
+          openid: openId,
+          isExpired: false,
+          statusId: selectedStatusId,
+        })
+        .get();
+        //判断用户是否设置了状态,如果
+        if(us._id){
+          this.updateUserStatusLocation(us._id);
+          console.log("--------------us",us._id);
+        }
         // 基于当前位置统计附近的同状态用户
         const { selectedStatusId } = this.data;
         if (selectedStatusId != null) {
@@ -213,9 +229,6 @@ Page({
       },
       fail: (err) => {
         console.error('=== 定位失败 ===', err);
-        
-        // 错误码 12: 用户拒绝授权
-        // 错误码 6: 没有权限（可能之前拒绝了且没去设置页开）
         if (err.errMsg.includes('fail auth deny') || err.errCode === 12 || err.errCode === 6) {
           wx.showModal({
             title: '提示',
@@ -329,47 +342,20 @@ Page({
     this.setData({ loading: true });
     try {
       const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
-      const addRes = await wx.cloud.callFunction({
+      await wx.cloud.callFunction({
         name: 'addStatus',
         config: { env: envId },
         data: {
           statusId: selectedStatusId,
           statusName: statusInfo.name,
           duration: selectedDuration,
+          locationInfo: this.data.locationInfo
         },
       });
       await this.loadCount();
-
-      // 写入位置信息到 user_status（如果有定位）
-      try {
-        const loc = locationInfo;
-        if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
-          const db = wx.cloud.database();
-          const openId = app.globalData.openId;
-          if (openId) {
-            const latest = await db.collection('user_status')
-              .where({ openid: openId, statusId: selectedStatusId, isExpired: false })
-              .orderBy('createdAt', 'desc')
-              .limit(1)
-              .get();
-            if (latest.data.length > 0) {
-              await db.collection('user_status').doc(latest.data[0]._id).update({
-                data: {
-                  lat: loc.latitude,
-                  lng: loc.longitude,
-                },
-              });
-            }
-          }
-        }
-      } catch (e) {
-        console.error('写入 user_status 坐标失败:', e);
-      }
-
-      // 1) 先本地发一条弹幕（即时反馈）
-      this.pushDanmaku(this.data.danmakuText);
-
-      // 2) 再写入数据库 danmus（不再存坐标，坐标在 user_status 中）
+      // 1) 先本地发一条弹幕（即时反馈）因为有watch函数所以 不需要调用 pushDanmaku函数了
+      // this.pushDanmaku(this.data.danmakuText);
+      // 2) 再写入数据库 danmus
       try {
         const db = wx.cloud.database();
         const openId = app.globalData.openId;
@@ -503,7 +489,7 @@ Page({
         console.log("status_records查询结果:", JSON.stringify(sr.data));
         
         const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
-        const addRes = await wx.cloud.callFunction({
+        await wx.cloud.callFunction({
           name: 'updateStatus',
           config: { env: envId },
           data: {
@@ -511,7 +497,6 @@ Page({
             userStatusId: us.data[0]._id
           },
         });
-          
        
         await db.collection('danmus')
           .where({
@@ -563,6 +548,16 @@ Page({
     }
   },
 
+  async updateUserStatusLocation(){
+    const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
+    await wx.cloud.callFunction({
+      name: 'updateStatus',
+      config: { env: envId },
+      data: {
+        locationInfo: this.data.locationInfo
+      },
+    });
+  },
   pushDanmaku(text) {
     const t = (text || '').trim();
     if (!t) return;

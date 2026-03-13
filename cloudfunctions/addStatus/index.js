@@ -5,7 +5,7 @@ const _ = db.command;
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
-  const { statusId, statusName, duration } = event;
+  const { statusId, statusName, duration,locationInfo } = event;
   const openId = wxContext.OPENID;
   
   try {
@@ -49,13 +49,14 @@ exports.main = async (event, context) => {
           statusName,
           isExpired: false,
           expireTime,
-          createdAt: now
+          createdAt: now,
+          lat: locationInfo.latitude,
+          lng: locationInfo.longitude,
         }
       });
       
       // 5. 提交事务
       await transaction.commit();
-      
       return {
         success: true,
         data: {
