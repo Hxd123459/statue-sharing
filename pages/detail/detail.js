@@ -190,19 +190,12 @@ Page({
   },
 
   onNearby() {
-    wx.getLocation({
+    wx.getFuzzyLocation({
       type: 'wgs84', // 或者 'gcj02'，返回坐标系类型
-      altitude: true, // 传入 true 会解析速度，但在部分安卓机型可能无效
       success: (res) => {
         console.log('=== 定位成功 ===');
         console.log('纬度:', res.latitude);
         console.log('经度:', res.longitude);
-        console.log('速度:', res.speed);
-        console.log('精度:', res.accuracy);
-        console.log('高度:', res.altitude);
-        console.log('垂直精度:', res.verticalAccuracy);
-        console.log('水平精度:', res.horizontalAccuracy);
-        
         // 保存定位信息
         this.setData({ locationInfo: res });
         // 更新用户当前位置到 user_status
@@ -456,7 +449,7 @@ Page({
       // 查询当前用户所有未过期状态
       const res = await db.collection('user_status')
         .where({
-          openid: openId,
+          openId: openId,
           isExpired: false,
         })
         .get();

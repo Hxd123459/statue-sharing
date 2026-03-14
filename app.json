@@ -8,9 +8,12 @@
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",
+  "requiredPrivateInfos": [
+    "getFuzzyLocation"
+  ],
   "permission": {
-    "scope.userLocation": {
-      "desc": "你的位置信息将用于展示区域热度" 
+    "scope.userFuzzyLocation": {
+      "desc": "你的位置信息将用于查看附近同状态"
     }
   }
 }

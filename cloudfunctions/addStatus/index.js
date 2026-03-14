@@ -50,8 +50,8 @@ exports.main = async (event, context) => {
           isExpired: false,
           expireTime,
           createdAt: now,
-          lat: locationInfo.latitude,
-          lng: locationInfo.longitude,
+          lat: locationInfo?.latitude, 
+          lng: locationInfo?.longitude,
         }
       });
       
