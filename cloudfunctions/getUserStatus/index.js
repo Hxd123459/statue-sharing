@@ -9,7 +9,7 @@ exports.main = async (event, context) => {
   try {
     const result = await db.collection('user_status')
       .where({
-        _openid: openid
+        openId: openid
       })
       .get();
     

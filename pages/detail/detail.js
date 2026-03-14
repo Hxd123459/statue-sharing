@@ -204,7 +204,7 @@ Page({
         const openId = app.globalData.openId;
         const us = db.collection('user_status')
         .where({
-          openid: openId,
+          openId: openId,
           isExpired: false,
           statusId: selectedStatusId,
         })
@@ -256,7 +256,7 @@ Page({
     });
   },
 
-  // 计算附近 500m 内同状态用户数量（基于 user_status 中的位置信息）
+  // 计算附近 5000m 内同状态用户数量（基于 user_status 中的位置信息）
   async updateNearbyStats(lat, lng, statusId) {
     try {
       const db = wx.cloud.database();
@@ -276,7 +276,7 @@ Page({
       const nearby = list.filter(item => {
         if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return false;
         const d = this.computeDistanceMeters(lat, lng, item.lat, item.lng);
-        return d <= 500;
+        return d <= 10000;
       });
 
       const count = nearby.length;
@@ -470,7 +470,7 @@ Page({
       if (oldStatusIds.length > 0) {
         const us = await db.collection('user_status')
         .where({
-          openid: openId,
+          openId: openId,
           isExpired: false,
           statusId: oldStatusIds[0],
         })
