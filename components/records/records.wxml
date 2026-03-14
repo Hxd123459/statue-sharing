@@ -44,9 +44,9 @@
                 <text class="time-text">{{record.startTimeStr}} - {{record.endTimeStr}}</text>
               </view>
               
-              <view class="record-duration" wx:if="{{showDuration}}">
+              <!-- <view class="record-duration" wx:if="{{showDuration}}">
                 <text class="duration-text">{{record.durationText}}</text>
-              </view>
+              </view> -->
             </view>
           </view>
         </view>

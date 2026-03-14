@@ -82,7 +82,7 @@ Component({
 
         // 查询记录
         const res = await db.collection('user_status')
-          .where({ openid: openId })
+          .where({ openId: openId })
           .orderBy('createdAt', 'desc')
           .skip(skip)
           .limit(pageSize)
