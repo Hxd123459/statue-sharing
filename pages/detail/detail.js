@@ -189,33 +189,41 @@ Page({
     this.setData({ showDurationPicker: true });
   },
 
-  onNearby() {
+  async onNearby() {
+    const { selectedStatusId } = this.data;
+    // 更新用户当前位置到 user_status
+    const db = wx.cloud.database();
+    const _ = db.command;
+    const openId = app.globalData.openId;
+    const us = await db.collection('user_status')
+    .where({
+      openId: openId,
+      isExpired: false,
+      statusId: selectedStatusId,
+    })
+    .get();
+    console.log("-------------2222",us.data)
     wx.getFuzzyLocation({
       type: 'wgs84', // 或者 'gcj02'，返回坐标系类型
       success: (res) => {
         console.log('=== 定位成功 ===');
         console.log('纬度:', res.latitude);
         console.log('经度:', res.longitude);
+       
         // 保存定位信息
         this.setData({ locationInfo: res });
-        // 更新用户当前位置到 user_status
-        const db = wx.cloud.database();
-        const _ = db.command;
-        const openId = app.globalData.openId;
-        const us = db.collection('user_status')
-        .where({
-          openId: openId,
-          isExpired: false,
-          statusId: selectedStatusId,
-        })
-        .get();
         //判断用户是否设置了状态,如果
-        if(us._id){
-          this.updateUserStatusLocation(us._id);
-          console.log("--------------us",us._id);
+        if (us.data && us.data.length > 0){
+          this.updateUserStatusLocation(us.data[0]._id);
+          console.log("--------------us",us.data[0]._id);
+        } else {
+          wx.showToast({
+            title: '请先设置您的状态',
+            icon: 'none',
+            duration: 2000
+          });
+          return;
         }
-        // 基于当前位置统计附近的同状态用户
-        const { selectedStatusId } = this.data;
         if (selectedStatusId != null) {
           this.updateNearbyStats(res.latitude, res.longitude, selectedStatusId);
         }
@@ -255,6 +263,22 @@ Page({
       }
     });
   },
+  // 获取当前
+  async getCurrentUserStatus(selectedStatusId){
+      // 更新用户当前位置到 user_status
+      const db = wx.cloud.database();
+      const _ = db.command;
+      const openId = app.globalData.openId;
+      const us = await db.collection('user_status')
+      .where({
+        openId: openId,
+        isExpired: false,
+        statusId: selectedStatusId,
+      })
+      .get();
+      console.log("-------------2222",us.data)
+      return us;
+  },
 
   // 计算附近 5000m 内同状态用户数量（基于 user_status 中的位置信息）
   async updateNearbyStats(lat, lng, statusId) {
@@ -269,9 +293,7 @@ Page({
           lat: _.gt(0),
           lng: _.gt(0),
         })
-        .limit(100)
         .get();
-
       const list = res.data || [];
       const nearby = list.filter(item => {
         if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return false;

@@ -43,7 +43,7 @@
       </view>
       <view class="tap-hint">
         <view class="tap-dot"></view>
-        <text class="tap-hint-text">点击上方图标发起「碰一下」并记录你的位置</text>
+        <text class="tap-hint-text">点击上方图标发起「碰一下」设置你的状态</text>
       </view>
     </view>
   </view>

@@ -27,7 +27,10 @@ exports.main = async (event, context) => {
           }
         });
     }
+
     if(locationInfo && id){
+      console.log("locationInfo:",locationInfo)
+      console.log("id:",id)
       await db.collection('user_status').doc(id).update({
         data: {
           lat: locationInfo.latitude,

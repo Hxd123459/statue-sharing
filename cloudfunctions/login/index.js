@@ -21,10 +21,6 @@ exports.main = async (event, context) => {
         await db.collection('users').add({
           data: {
             openId,
-            currentStatus: null,
-            statusStartTime: null,
-            statusEndTime: null,
-            lastUpdateTime: null,
             createdAt: new Date(),
             updatedAt: new Date()
           }

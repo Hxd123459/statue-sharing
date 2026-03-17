@@ -150,7 +150,7 @@ Component({
         let myStatus = null;
         if(openId){
           const result = await db.collection('user_status')
-          .where({ openid: openId, isExpired: false })
+          .where({ openId: openId, isExpired: false })
           .get();
           myStatus = result.data.length === 0 ? null : result.data[0].statusId;
         }
