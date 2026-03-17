@@ -541,12 +541,13 @@ Page({
     }
   },
 
-  async updateUserStatusLocation(){
+  async updateUserStatusLocation(id){
     const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
     await wx.cloud.callFunction({
       name: 'updateStatus',
       config: { env: envId },
       data: {
+        id:id,
         locationInfo: this.data.locationInfo
       },
     });
