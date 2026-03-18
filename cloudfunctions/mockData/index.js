@@ -1,117 +1,118 @@
 // 云函数入口文件
 const cloud = require('wx-server-sdk')
-
+const { STATUS_LIST} = require('../../utils/constants.js');
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV }) // 使用当前云环境
+const db = cloud.database(); 
+const _ = db.command; 
 
-// 云函数入口函数
-exports.main = async (event, context) => {
-  const wxContext = cloud.getWXContext()
-  try {
-    const COUNT = 1;
-    const danmusToInsert = [];
-    const userStatusesToInsert = [];
-
-    const now = new Date();
-    const expireTime = new Date(now.getTime() + 30 * 60 * 1000); // 30分钟后
-
-    for (let i = 1; i <= COUNT; i++) {
-      // 1. 生成随机索引
-      const statusIndex = getRandomInt(0, 21); 
-      const danmuIndex = getRandomInt(0, 5);   
-
-      // 2. 获取源数据
-      const statusObj = STATUS_LIST[statusIndex];
-      const safeDanmuIndex = danmuIndex < statusObj.Danmu.length ? danmuIndex : 0;
-      const danmuContent = statusObj.Danmu[safeDanmuIndex];
-
-      // 3. 构造 openId
-      const openId = `test-${i.toString().padStart(2, '0')}`;
-
-      // 4. 【新增】生成随机位置
-      const location = generateRandomLocation();
-
-      // 5. 构造 R1 数据 (用于 danmus 集合)
-      const danmuRecord = {
-        openId: openId,
-        statusId: statusObj.id,
-        danmuContent: danmuContent,
-        createAt: now,
-        expireTime: expireTime,
-        isExpired: false,
-        // 添加位置信息
-        lat: location.lat,
-        lng: location.lng
-      };
-
-      // 6. 构造 R1 数据 (用于 user_status 集合)
-      const userStatusRecord = {
-        openId: openId,
-        statusId: statusObj.id,
-        statusName: statusObj.name,
-        createAt: now,
-        expireTime: expireTime,
-        isExpired: false,
-        // 添加位置信息 (user_status 通常也需要位置来做附近的人查询)
-        lat: location.lat,
-        lng: location.lng
-      };
-
-      danmusToInsert.push(danmuRecord);
-      userStatusesToInsert.push(userStatusRecord);
-    }
-
-    // 7. 批量写入数据库
-    const [danmuRes, statusRes] = await Promise.all([
-      db.collection('danmus').add({
-        data: danmusToInsert
-      }),
-      db.collection('user_status').add({
-        data: userStatusesToInsert
-      })
-    ]);
-
-    return {
-      success: true,
-      message: `成功生成并插入 ${COUNT} 条带位置的数据`,
-      details: {
-        danmusInserted: danmuRes._ids.length,
-        userStatusesInserted: statusRes._ids.length,
-        sampleLocation: {
-          lat: danmusToInsert[0].lat,
-          lng: danmusToInsert[0].lng
-        }
-      }
-    };
-
-  } catch (error) {
-    console.error("生成数据失败:", error);
-    return {
-      success: false,
-      message: "生成数据失败",
-      error: error.message
-    };
-  }
-}
-
-// 辅助函数：生成指定范围的随机整数 [min, max]
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// 【新增】辅助函数：生成随机经纬度 (模拟中国大陆范围)
 function generateRandomLocation() {
-  // 中国大致范围：纬度 18~54, 经度 73~135
-  // 为了数据更集中像城市用户，可以稍微缩小一点，或者保持大范围
-  const minLat = 18.000000;
-  const maxLat = 54.000000;
-  const minLng = 73.000000;
-  const maxLng = 135.000000;
-
-  const lat = (Math.random() * (maxLat - minLat) + minLat).toFixed(6);
-  const lng = (Math.random() * (maxLng - minLng) + minLng).toFixed(6);
-
+  const minLat = 18.000000, maxLat = 54.000000;
+  const minLng = 73.000000, maxLng = 135.000000;
   return {
-    lat: parseFloat(lat),
-    lng: parseFloat(lng)
+    lat: parseFloat((Math.random() * (maxLat - minLat) + minLat).toFixed(6)),
+    lng: parseFloat((Math.random() * (maxLng - minLng) + minLng).toFixed(6))
   };
 }
+
+exports.main = async (event, context) => {
+  const COUNT = 50;
+  const danmusToInsert = [];
+  const userStatusesToInsert = [];
+  const now = new Date();
+  const expireTime = new Date(now.getTime() + 30 * 60 * 1000);
+
+  // --- 第一步：准备数据 ---
+  for (let i = 1; i <= COUNT; i++) {
+    const statusIndex = getRandomInt(0, 21);
+    const danmuIndex = getRandomInt(0, 5);
+    const statusObj = STATUS_LIST[statusIndex];
+    const safeDanmuIndex = danmuIndex < statusObj.Danmu.length ? danmuIndex : 0;
+    const openId = `test-${i.toString().padStart(2, '0')}`;
+    const location = generateRandomLocation();
+
+    danmusToInsert.push({
+      openId, 
+      statusId: statusObj.id, 
+      danmuContent: statusObj.Danmu[safeDanmuIndex],
+      createAt: now, 
+      expireTime, 
+      isExpired: false,
+      lat: location.lat, 
+      lng: location.lng
+    });
+
+    userStatusesToInsert.push({
+      openId, 
+      statusId: statusObj.id, 
+      statusName: statusObj.name,
+      createAt: now, 
+      expireTime, 
+      isExpired: false,
+      lat: location.lat, 
+      lng: location.lng
+    });
+  }
+
+  try {
+    // --- 第二步：并行执行 ---
+    
+    // 任务 A: 普通批量插入
+    const insertPromise = Promise.all([
+      db.collection('danmus').add({ data: danmusToInsert }),
+      db.collection('user_status').add({ data: userStatusesToInsert })
+    ]);
+
+    // 任务 B: 事务更新统计
+    const transactionPromise = db.runTransaction(async (transaction) => {
+      // 【修复核心】：不要尝试从 transaction 获取 command。
+      // 直接使用模块顶层定义的 const _ = db.command; 即可。
+      // _.inc() 返回的是一个纯对象指令，transaction.update 会识别它。
+      
+      const counts = {};
+      userStatusesToInsert.forEach(item => {
+        counts[item.statusId] = (counts[item.statusId] || 0) + 1;
+      });
+
+      const updatePromises = Object.keys(counts).map(id => {
+        const countToAdd = counts[id];
+        
+        // 这里直接使用外部的 _
+        return transaction.collection('status_records')
+          .where({ statusId: parseInt(id) })
+          .update({
+            data: {
+              total: _.inc(countToAdd), 
+              updateTime: now,
+            },
+          });
+      });
+
+      await Promise.all(updatePromises);
+    });
+
+    // 等待所有任务完成
+    const [insertRes] = await Promise.all([insertPromise, transactionPromise]);
+
+    return {
+      success: true,
+      message: `成功插入 ${COUNT} 条数据并完成统计`,
+      details: {
+        danmusInserted: insertRes[0]._ids.length,
+        userStatusesInserted: insertRes[1]._ids.length
+      }
+    };
+
+  } catch (error) {
+    console.error("操作失败:", error);
+    return {
+      success: false,
+      message: "操作失败",
+      error: error.message,
+      stack: error.stack
+    };
+  }
+};
