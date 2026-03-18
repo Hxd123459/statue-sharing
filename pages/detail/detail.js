@@ -202,20 +202,17 @@ Page({
       statusId: selectedStatusId,
     })
     .get();
-    console.log("-------------2222",us.data)
     wx.getFuzzyLocation({
       type: 'wgs84', // 或者 'gcj02'，返回坐标系类型
       success: (res) => {
         console.log('=== 定位成功 ===');
         console.log('纬度:', res.latitude);
         console.log('经度:', res.longitude);
-       
         // 保存定位信息
         this.setData({ locationInfo: res });
-        //判断用户是否设置了状态,如果
+        //判断用户是否设置了状态,如果 用户还没有设置状态，先设置状态才能继续
         if (us.data && us.data.length > 0){
           this.updateUserStatusLocation(us.data[0]._id);
-          console.log("--------------us",us.data[0]._id);
         } else {
           wx.showToast({
             title: '请先设置您的状态',
@@ -224,8 +221,9 @@ Page({
           });
           return;
         }
+        // 计算附近
         if (selectedStatusId != null) {
-          this.updateNearbyStats(res.latitude, res.longitude, selectedStatusId);
+          this.updateNearbyStats(res.latitude, res.longitude, selectedStatusId,openId);
         }
       },
       fail: (err) => {
@@ -263,35 +261,19 @@ Page({
       }
     });
   },
-  // 获取当前
-  async getCurrentUserStatus(selectedStatusId){
-      // 更新用户当前位置到 user_status
-      const db = wx.cloud.database();
-      const _ = db.command;
-      const openId = app.globalData.openId;
-      const us = await db.collection('user_status')
-      .where({
-        openId: openId,
-        isExpired: false,
-        statusId: selectedStatusId,
-      })
-      .get();
-      console.log("-------------2222",us.data)
-      return us;
-  },
 
   // 计算附近 5000m 内同状态用户数量（基于 user_status 中的位置信息）
-  async updateNearbyStats(lat, lng, statusId) {
+  async updateNearbyStats(lat, lng, statusId,openId) {
     try {
       const db = wx.cloud.database();
       const _ = db.command;
-
       const res = await db.collection('user_status')
         .where({
           statusId,
           isExpired: false,
           lat: _.gt(0),
           lng: _.gt(0),
+          openId: _.neq(openId) 
         })
         .get();
       const list = res.data || [];
@@ -306,7 +288,7 @@ Page({
       if (count > 0) {
         summary = `附近有 ${count} 人也在${this.data.statusInfo.name || ''}`;
       } else {
-        summary = '附近暂时没有同样状态的人';
+        summary = '附近除了你暂时没有同样状态的人';
       }
 
       this.setData({
