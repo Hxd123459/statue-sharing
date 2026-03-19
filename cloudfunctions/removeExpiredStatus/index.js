@@ -35,7 +35,8 @@ exports.main = async (event, context) => {
         cleanedCount: 0
       };
     }
-    
+    // mock数据需要删除
+    await deleteMockData(expiredRecords);
     // 2. 按 openid 和 statusId 分组统计需要减少的数量
     const reduceMap = {};
     expiredRecords.data.forEach(record => {
@@ -80,6 +81,7 @@ exports.main = async (event, context) => {
         }
       });
     
+   
     return {
       success: true,
       message: '清理完成',
@@ -93,4 +95,41 @@ exports.main = async (event, context) => {
       error: error.message
     };
   }
+  // 删除mock 数据
+  async function deleteMockData(expiredRecords) {
+    const testUserRecords = expiredRecords.data.filter(record => {
+      const oid = record.openId || '';
+      return oid.toLowerCase().startsWith('test');
+    });
+    console.log("待删除的Mock数据条数", testUserRecords);
+    let deletedCount = 0;
+    if (testUserRecords.length > 0) {
+      const deleteIds = testUserRecords.map(r => r._id);
+      // 分批删除，防止超过单次操作限制 (通常为 1000 条)
+      const batchSize = 1000;
+      const deletePromises = [];
+
+      for (let i = 0; i < deleteIds.length; i += batchSize) {
+        const batch = deleteIds.slice(i, i + batchSize);
+        const promise = db.collection('user_status')
+          .where({
+            _id: _.in(batch)
+          })
+          .remove()
+          .then(res => {
+            deletedCount += (res.stats.removed || 0);
+            console.log(`批次删除成功，本批删除：${res.stats.removed}`);
+          })
+          .catch(err => {
+            console.error(`批次删除失败:`, err);
+            throw err;
+          });
+
+        deletePromises.push(promise);
+      }
+
+      await Promise.all(deletePromises);
+    }
+    console.log("已删除的mock数据条数：:", deletedCount);
+  } 
 };

@@ -19,11 +19,11 @@ function generateRandomLocation() {
 }
 
 exports.main = async (event, context) => {
-  const COUNT = 50;
+  const COUNT = 100;
   const danmusToInsert = [];
   const userStatusesToInsert = [];
   const now = new Date();
-  const expireTime = new Date(now.getTime() + 30 * 60 * 1000);
+  const expireTime = new Date(now.getTime() + 1 * 60 * 1000);
 
   // --- 第一步：准备数据 ---
   for (let i = 1; i <= COUNT; i++) {
@@ -68,8 +68,6 @@ exports.main = async (event, context) => {
 
     // 任务 B: 事务更新统计
     const transactionPromise = db.runTransaction(async (transaction) => {
-      // 【修复核心】：不要尝试从 transaction 获取 command。
-      // 直接使用模块顶层定义的 const _ = db.command; 即可。
       // _.inc() 返回的是一个纯对象指令，transaction.update 会识别它。
       
       const counts = {};
