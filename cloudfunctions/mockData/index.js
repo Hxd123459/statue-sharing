@@ -1,7 +1,12 @@
 // 云函数入口文件
 const cloud = require('wx-server-sdk')
 const { STATUS_LIST} = require('../../utils/constants.js');
-cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV }) // 使用当前云环境
+const ENV_ID = 'cloud1-0g7t1v9lab94a58b'; 
+
+// 初始化时指定具体的 env
+cloud.init({ 
+  env: ENV_ID 
+})
 const db = cloud.database(); 
 const _ = db.command; 
 
@@ -19,12 +24,23 @@ function generateRandomLocation() {
 }
 
 exports.main = async (event, context) => {
-  const COUNT = 100;
+  // 现在打印这个就会显示具体的 ID 了
+  console.log('[Info] 当前明确指定的环境 ID:', ENV_ID);
+  // 也可以打印 cloud.config.env 确认
+  console.log('[Info] 实例实际运行的环境:', cloud.config?.env);
+  // 凌晨2点-6点不执行！
+  const COUNT = 1;
   const danmusToInsert = [];
   const userStatusesToInsert = [];
   const now = new Date();
-  const expireTime = new Date(now.getTime() + 1 * 60 * 1000);
+  
+  // 1. 定义时间范围的毫秒数
+  const oneMinuteMs = 1 * 60 * 1000;       // 60,000 ms
+  const thirtyMinutesMs = 30 * 60 * 1000;  // 1,800,000 ms
+  // 2. 获取随机毫秒偏移量 (1分钟 ~ 30分钟)
+  const randomOffsetMs = getRandomInt(oneMinuteMs, thirtyMinutesMs);
 
+  const expireTime = new Date(now.getTime() + randomOffsetMs);
   // --- 第一步：准备数据 ---
   for (let i = 1; i <= COUNT; i++) {
     const statusIndex = getRandomInt(0, 21);
@@ -77,7 +93,8 @@ exports.main = async (event, context) => {
 
       const updatePromises = Object.keys(counts).map(id => {
         const countToAdd = counts[id];
-        
+        console.log("mock-data:数量",countToAdd)
+        console.log("mock-id:",id)
         // 这里直接使用外部的 _
         return transaction.collection('status_records')
           .where({ statusId: parseInt(id) })

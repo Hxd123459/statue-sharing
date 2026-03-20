@@ -521,7 +521,6 @@ Page({
       const res = await db.collection('danmus')
         .where({
           statusId: selectedStatusId,
-          expireTime: _.gt(now),
           isExpired: false,
         })
         .orderBy('createdAt', 'asc')
