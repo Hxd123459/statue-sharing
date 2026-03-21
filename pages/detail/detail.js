@@ -448,8 +448,6 @@ Page({
 
       const db = wx.cloud.database();
       const _ = db.command;
-      const now = new Date();
-
       // 查询当前用户所有未过期状态
       const res = await db.collection('user_status')
         .where({
