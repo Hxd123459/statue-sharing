@@ -5,34 +5,31 @@ const _ = db.command;
 
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
-  const { statusId, statusName, duration, locationInfo } = event;
+  // 确保状态ID是数字类型，防止字符串/数字不匹配
+  const targetStatusId = Number(event.statusId); 
+  const { statusName, duration, locationInfo } = event;
   const openId = wxContext.OPENID;
 
   try {
-    // 1. 计算过期时间
     const now = new Date();
     const expireTime = new Date(now.getTime() + duration * 60 * 1000);
+    const VERY_RECENT_MS = 3000;
+    const recentStartTime = new Date(now.getTime() - VERY_RECENT_MS);
 
-    // 2. 开启事务
     const transaction = await db.startTransaction();
 
     try {
-      // 2.1 防止短时间内重复点击：
-      // 同一个用户 + 同一个状态，在 VERY_RECENT_MS 毫秒内只允许成功一次
-      const VERY_RECENT_MS = 3000; // 3 秒窗口，可按需调整
-      const recentStartTime = new Date(now.getTime() - VERY_RECENT_MS);
-
+      // 1. 防重检查
       const recent = await transaction.collection('user_status')
         .where({
           openId,
-          statusId,
+          statusId: targetStatusId, // 使用转换后的类型
           isExpired: false,
           createdAt: _.gte(recentStartTime),
         })
         .get();
 
       if (recent.data && recent.data.length > 0) {
-        // 认为是“快速重复点击”，不再重复计数 / 写入
         await transaction.rollback();
         return {
           success: false,
@@ -41,10 +38,11 @@ exports.main = async (event, context) => {
         };
       }
 
-      // 3. 更新 status_records 中的 total + 1
+      // 2. 更新 total (前提：status_records 中必须预先存在该条记录)
+      // 如果这里 updated 为 0，说明数据库中真的没有这条记录，或者类型不匹配
       const statusResult = await transaction.collection('status_records')
         .where({
-          statusId: statusId,
+          statusId: targetStatusId, 
         })
         .update({
           data: {
@@ -53,23 +51,21 @@ exports.main = async (event, context) => {
           },
         });
 
-      // 如果记录不存在，则创建
       if (statusResult.stats.updated === 0) {
-        await transaction.collection('status_records').add({
-          data: {
-            statusId,
-            statusName,
-            total: 1,
-            updateTime: now,
-          },
-        });
+        console.error(`[Error] status_records 中找不到 statusId: ${targetStatusId}，请检查数据类型或运行初始化脚本。`);
+        await transaction.rollback();
+        return {
+          success: false,
+          code: 'MISSING_STATUS_RECORD',
+          message: '系统状态配置缺失，请联系管理员。',
+        };
       }
 
-      // 4. 在 user_status 中创建记录
+      // 3. 写入 user_status
       await transaction.collection('user_status').add({
         data: {
           openId,
-          statusId,
+          statusId: targetStatusId,
           statusName,
           isExpired: false,
           expireTime,
@@ -79,17 +75,14 @@ exports.main = async (event, context) => {
         },
       });
 
-      // 5. 提交事务
       await transaction.commit();
+      
       return {
         success: true,
-        data: {
-          expireTime,
-          duration,
-        },
+        data: { expireTime, duration },
       };
+
     } catch (err) {
-      // 事务失败，回滚
       await transaction.rollback();
       throw err;
     }

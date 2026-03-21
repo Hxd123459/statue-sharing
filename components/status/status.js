@@ -127,14 +127,44 @@ Component({
       try {
         const db = wx.cloud.database();
         const _ = db.command;
-        const now = new Date();
         const openId = app.globalData.openId;
-        // 查询所有有效状态的用户（只取必要字段）
-        const result = await db.collection('status_records')
-        .get();
+        const MAX_LIMIT = 100; // 云开发单次查询上限是 100
+        // 1. 先获取总数，决定要分几批拉取
+        const countRes = await db.collection('status_records').count();
+        const total = countRes.total;
+
+        // 计算需要请求的次数 (向上取整)
+        const batchTimes = Math.ceil(total / MAX_LIMIT);
+
+        const tasks = [];
+        // 2. 创建所有分批请求的任务
+        for (let i = 0; i < batchTimes; i++) {
+          const promise = db.collection('status_records')
+            .orderBy('total', 'desc') // 保持排序一致性
+            .skip(i * MAX_LIMIT)
+            .limit(MAX_LIMIT)
+            .get();
+          tasks.push(promise);
+        }
+        
+        let allData = [];
+        // 3. 并发执行所有请求
+        if (tasks.length > 0) {
+          const res = await Promise.all(tasks);
+          // 4. 将多次数组结果合并成一个数组 [page1, page2] -> [item1, item2...]
+          allData = res.reduce((acc, cur) => {
+            return acc.concat(cur.data);
+          }, []);
+        } else {
+          // 如果总数为 0，防止上面的循环不执行，手动查一次
+          const res = await db.collection('status_records').limit(MAX_LIMIT).get();
+          allData = res.data;
+        }
+
+      
         // 前端分组统计
         const countMap = {};
-        (result.data || []).forEach(item => {
+        (allData || []).forEach(item => {
           const status = item.statusId;
           if (status) {
             countMap[status] = item.total;
@@ -151,6 +181,7 @@ Component({
         if(openId){
           const result = await db.collection('user_status')
           .where({ openId: openId, isExpired: false })
+          .limit(1)
           .get();
           myStatus = result.data.length === 0 ? null : result.data[0].statusId;
         }

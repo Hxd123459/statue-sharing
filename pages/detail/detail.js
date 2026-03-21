@@ -479,12 +479,9 @@ Page({
           statusId: oldStatusIds[0],
         })
         .get();
-        console.log("user_status查询结果:", JSON.stringify(us.data));
         const sr = await db.collection('status_records')
         .where({ statusId: oldStatusIds[0] })
         .get();
-        console.log("status_records查询结果:", JSON.stringify(sr.data));
-        
         const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
         await wx.cloud.callFunction({
           name: 'updateStatus',
