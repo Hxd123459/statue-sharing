@@ -244,15 +244,6 @@
     color: var(--text-secondary);
   }
   
-  .active-tag {
-    padding: 8rpx 16rpx;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 24rpx;
-    font-size: 24rpx;
-    color: white;
-    backdrop-filter: blur(8rpx);
-  }
-  
   /* 底部安全距离 */
   .bottom-safe-area {
     height: 200rpx;

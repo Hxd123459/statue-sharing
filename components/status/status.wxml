@@ -79,7 +79,6 @@
         </view>
         <view class="card-right">
           <text class="count count-animate">{{item.count}}人</text>
-          <!-- <text class="active-tag" wx:if="{{item.isMine}}">进行中</text> -->
         </view>
       </view>
     </view>
