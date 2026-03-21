@@ -24,16 +24,44 @@ function generateRandomLocation() {
 }
 
 exports.main = async (event, context) => {
-  // 现在打印这个就会显示具体的 ID 了
-  console.log('[Info] 当前明确指定的环境 ID:', ENV_ID);
-  // 也可以打印 cloud.config.env 确认
-  console.log('[Info] 实例实际运行的环境:', cloud.config?.env);
-  // 凌晨2点-6点不执行！
+  // --- 1. 获取并校准北京时间 ---
+  const now = new Date();
+  // 云函数默认是 UTC 时间，北京时间 = UTC + 8 小时
+  const beijingTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  const currentHour = beijingTime.getHours();
+
+  console.log(`[Time Check] 当前北京时间: ${beijingTime.toLocaleString('zh-CN')}, 小时: ${currentHour}`);
+
+  // --- 2. 条件一：凌晨 2点-6点 不执行 (包含2点，不包含6点，即 02:00:00 - 05:59:59) ---
+  // 如果你希望 6:00 整也不执行，可以改成 currentHour < 6
+  if (currentHour >= 2 && currentHour < 6) {
+    console.log('[Skip] 当前处于凌晨维护时间 (02:00-06:00)，任务跳过。');
+    return {
+      success: true,
+      message: 'Skipped due to maintenance time (02:00-06:00)',
+      reason: 'maintenance_time'
+    };
+  }
+
+  // --- 3. 条件二：随机概率判断 (50% 几率执行) ---
+  const randomFlag = getRandomInt(0, 1);
+  console.log(`[Chance Check] 随机生成的标志位: ${randomFlag} (1=执行, 0=跳过)`);
+
+  if (randomFlag === 0) {
+    console.log('[Skip] 随机概率未命中，任务跳过。');
+    return {
+      success: true,
+      message: 'Skipped due to random chance',
+      reason: 'random_miss'
+    };
+  }
+
+  // --- ✅ 两个条件都满足，开始执行核心逻辑 ---
+  console.log('[Start] 所有条件满足，开始执行数据写入...');
+  
   const COUNT = 1;
   const danmusToInsert = [];
   const userStatusesToInsert = [];
-  const now = new Date();
-  
   // 1. 定义时间范围的毫秒数
   const oneMinuteMs = 1 * 60 * 1000;       // 60,000 ms
   const thirtyMinutesMs = 30 * 60 * 1000;  // 1,800,000 ms
