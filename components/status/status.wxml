@@ -61,7 +61,7 @@
     <!-- 第4名及以后展示区 (列表样式) -->
     <view class="status-list">
       <view 
-        class="status-card {{item.isMine ? 'mine' : ''}} {{item.rankChange === 1 ? 'rank-up' : ''}} {{item.rankChange === -1 ? 'rank-down' : ''}}"
+        class="status-card {{item.rankChange === 1 ? 'rank-up' : ''}} {{item.rankChange === -1 ? 'rank-down' : ''}}"
         wx:for="{{restList}}" 
         wx:key="id"
         bindtap="selectStatus"
