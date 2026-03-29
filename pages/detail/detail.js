@@ -182,8 +182,8 @@ Page({
     this.setData({ showDanmakuPicker: false });
   },
 
-  stopPropagation() {},
-  preventMove() {},
+  stopPropagation() { },
+  preventMove() { },
 
   onTime() {
     this.setData({ showDurationPicker: true });
@@ -196,12 +196,11 @@ Page({
     const _ = db.command;
     const openId = app.globalData.openId;
     const us = await db.collection('user_status')
-    .where({
-      openId: openId,
-      isExpired: false,
-      statusId: selectedStatusId,
-    })
-    .get();
+      .where({
+        openId: openId,
+        isExpired: false,
+      })
+      .get();
     wx.getFuzzyLocation({
       type: 'wgs84', // 或者 'gcj02'，返回坐标系类型
       success: (res) => {
@@ -210,20 +209,13 @@ Page({
         console.log('经度:', res.longitude);
         // 保存定位信息
         this.setData({ locationInfo: res });
-        //判断用户是否设置了状态,如果 用户还没有设置状态，先设置状态才能继续
-        if (us.data && us.data.length > 0){
+        //判断用户是否设置了状态,如果用户设置了状态后，需要将用户状态信息更新到 user_status 中
+        if (us.data && us.data.length > 0) {
           this.updateUserStatusLocation(us.data[0]._id);
-        } else {
-          wx.showToast({
-            title: '请先设置您的状态',
-            icon: 'none',
-            duration: 2000
-          });
-          return;
         }
         // 计算附近
         if (selectedStatusId != null) {
-          this.updateNearbyStats(res.latitude, res.longitude, selectedStatusId,openId);
+          this.updateNearbyStats(res.latitude, res.longitude, selectedStatusId, openId);
         }
       },
       fail: (err) => {
@@ -263,24 +255,35 @@ Page({
   },
 
   // 计算附近 5000m 内同状态用户数量（基于 user_status 中的位置信息）
-  async updateNearbyStats(lat, lng, statusId,openId) {
+  async updateNearbyStats(lat, lng, statusId, openId) {
     try {
       const db = wx.cloud.database();
       const _ = db.command;
-      const res = await db.collection('user_status')
-        .where({
-          statusId,
-          isExpired: false,
-          lat: _.gt(0),
-          lng: _.gt(0),
-          openId: _.neq(openId) 
-        })
-        .get();
-      const list = res.data || [];
+      const PAGE = 20;
+      const whereCond = {
+        statusId,
+        isExpired: false,
+        lat: _.gt(0),
+        lng: _.gt(0),
+      };
+      const base = () =>
+        db.collection('user_status').where(whereCond).orderBy('_id', 'asc');
+      const { total } = await db.collection('user_status').where(whereCond).count();
+      const batchTimes = Math.ceil(total / PAGE);
+      const tasks = [];
+      for (let i = 0; i < batchTimes; i++) {
+        tasks.push(base().skip(i * PAGE).limit(PAGE).get());
+      }
+      let allRows = [];
+      if (batchTimes > 0) {
+        const pages = await Promise.all(tasks);
+        allRows = pages.reduce((acc, cur) => acc.concat(cur.data), []);
+      }
+      const list = allRows.filter(item => item.openId !== openId);
       const nearby = list.filter(item => {
         if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return false;
         const d = this.computeDistanceMeters(lat, lng, item.lat, item.lng);
-        return d <= 10000;
+        return d <= 5000;
       });
 
       const count = nearby.length;
@@ -471,15 +474,15 @@ Page({
       );
       if (oldStatusIds.length > 0) {
         const us = await db.collection('user_status')
-        .where({
-          openId: openId,
-          isExpired: false,
-          statusId: oldStatusIds[0],
-        })
-        .get();
+          .where({
+            openId: openId,
+            isExpired: false,
+            statusId: oldStatusIds[0],
+          })
+          .get();
         const sr = await db.collection('status_records')
-        .where({ statusId: oldStatusIds[0] })
-        .get();
+          .where({ statusId: oldStatusIds[0] })
+          .get();
         const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
         await wx.cloud.callFunction({
           name: 'updateStatus',
@@ -489,7 +492,7 @@ Page({
             userStatusId: us.data[0]._id
           },
         });
-       
+
         await db.collection('danmus')
           .where({
             openId,
@@ -539,13 +542,13 @@ Page({
     }
   },
 
-  async updateUserStatusLocation(id){
+  async updateUserStatusLocation(id) {
     const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
     await wx.cloud.callFunction({
       name: 'updateStatus',
       config: { env: envId },
       data: {
-        id:id,
+        id: id,
         locationInfo: this.data.locationInfo
       },
     });
