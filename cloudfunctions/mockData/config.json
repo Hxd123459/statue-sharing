@@ -5,7 +5,7 @@
   },
   "triggers": [
     {
-      "name": "cleanExpiredStatus",
+      "name": "addMockData",
       "type": "timer",
       "config": "*/4 * * * * *"
     }
