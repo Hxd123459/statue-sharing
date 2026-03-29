@@ -7,7 +7,7 @@
     {
       "name": "cleanExpiredStatus",
       "type": "timer",
-      "config": "*/1 * * * * *"
+      "config": "*/4 * * * * *"
     }
   ]
 }
