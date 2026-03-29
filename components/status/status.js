@@ -28,7 +28,7 @@ Component({
     myCurrentStatus: null,
     selectedStatusId: null,
     loading: true,
-    currentStatusInfo:{},
+    currentStatusInfo: {},
     showDurationPicker: false,
   },
   watcher: null,
@@ -67,12 +67,12 @@ Component({
    * 组件的方法列表
    */
   methods: {
-  
+
     // 主题变更回调
     onThemeChange(newTheme) {
       this.setData({ theme: newTheme });
     },
-  
+
     // 初始化数据
     async initData() {
       try {
@@ -86,10 +86,10 @@ Component({
         if (openId) {
           app.globalData.openId = openId;
         }
-  
+
         // 加载状态数据
         await this.loadStatusCounts();
-  
+
         this.setData({ loading: false });
       } catch (err) {
         console.error('初始化失败:', err);
@@ -100,11 +100,11 @@ Component({
         });
       }
     },
-  
+
     // 初始化实时监听
     initWatcher() {
       const db = wx.cloud.database();
-  
+
       this.watcher = db.collection('status_records')
         .watch({
           onChange: (snapshot) => {
@@ -116,19 +116,20 @@ Component({
           }
         });
     },
-  
+
     // 防抖更新
     debouncedUpdate: debounce(function () {
       this.loadStatusCounts();
     }, 1000),
-  
+
     // 加载状态人数
     async loadStatusCounts() {
       try {
         const db = wx.cloud.database();
         const _ = db.command;
         const openId = app.globalData.openId;
-        const MAX_LIMIT = 100; // 云开发单次查询上限是 100
+        // 小程序端直连数据库：单次 get 最多 20 条（与 limit 写法无关）；云函数端才可更大
+        const MAX_LIMIT = 20;
         // 1. 先获取总数，决定要分几批拉取
         const countRes = await db.collection('status_records').count();
         const total = countRes.total;
@@ -146,7 +147,7 @@ Component({
             .get();
           tasks.push(promise);
         }
-        
+
         let allData = [];
         // 3. 并发执行所有请求
         if (tasks.length > 0) {
@@ -161,7 +162,7 @@ Component({
           allData = res.data;
         }
 
-      
+
         // 前端分组统计
         const countMap = {};
         (allData || []).forEach(item => {
@@ -170,19 +171,19 @@ Component({
             countMap[status] = item.total;
           }
         });
-  
+
         const statusList = Object.entries(countMap).map(([status, count]) => ({
           _id: status,
           count
         }));
-  
+
         // 获取当前用户状态
         let myStatus = null;
-        if(openId){
+        if (openId) {
           const result = await db.collection('user_status')
-          .where({ openId: openId, isExpired: false })
-          .limit(1)
-          .get();
+            .where({ openId: openId, isExpired: false })
+            .limit(1)
+            .get();
           myStatus = result.data.length === 0 ? null : result.data[0].statusId;
         }
         // 交给页面处理
@@ -201,16 +202,16 @@ Component({
       oldStatusList.forEach(item => {
         oldRankMap[item.id] = item.rank;
       });
-  
+
       // 创建状态计数映射
       const countMap = {};
       countData.forEach(item => {
         countMap[item._id] = item.count;
       });
-      
+
       // 映射当前用户的状态
       const targetItem = STATUS_LIST.find(item => item.id === myStatus);
-      
+
       // 生成完整状态列表
       const statusList = STATUS_LIST.map((status, index) => ({
         ...status,
@@ -222,10 +223,10 @@ Component({
         rankChange: 0, // 1=上升, -1=下降, 0=不变
         isNew: !oldRankMap[status.id] // 是否新上榜
       }));
-  
+
       // 按人数排序
       statusList.sort((a, b) => b.count - a.count);
-  
+
       // 添加排名和排名变化
       statusList.forEach((item, index) => {
         item.rank = index + 1;
@@ -240,20 +241,20 @@ Component({
           item.rankChange = 0; // 不变
         }
       });
-  
+
       // 计算总人数
       const totalCount = statusList.reduce((sum, item) => sum + item.count, 0);
-  
+
       // 分离前3名和其余
       const topThree = statusList.slice(0, 3);
       const restList = statusList.slice(3);
-  
+
       // 检测前三名是否有变化
       const oldTopThree = this.data.topThree || [];
       const topThreeChanged = topThree.some((item, index) => {
         return !oldTopThree[index] || oldTopThree[index].id !== item.id;
       });
-  
+
       this.setData({
         statusList,
         topThree,
@@ -263,7 +264,7 @@ Component({
         currentStatusInfo: targetItem || { name: '无', icon: '' },
         topThreeChanged, // 标记前三名是否变化
       });
-  
+
       // 如果前三名有变化，触发动画后重置标记
       if (topThreeChanged) {
         setTimeout(() => {
@@ -284,7 +285,7 @@ Component({
           });
           return;
         }
-  
+
         // 显示持续时间选择器
         this.setData({
           // showDurationPicker: true,
@@ -298,7 +299,7 @@ Component({
         wx.vibrateShort({ type: 'light' });
       });
     },
-  
+
     // 检查是否可以更新状态
     async checkCanUpdate() {
       try {
@@ -320,7 +321,7 @@ Component({
             return { success: false, message: '登录失败，请检查网络后重试' };
           }
         }
-  
+
         const db = wx.cloud.database();
         const res = await db.collection('users')
           .where({ openId })
@@ -328,11 +329,11 @@ Component({
         if (res.data.length === 0) {
           return { success: true };
         }
-  
+
         const user = res.data[0];
         const now = new Date();
         const lastUpdate = user.lastUpdateTime ? new Date(user.lastUpdateTime) : null;
-  
+
         if (lastUpdate) {
           const diffMinutes = (now - lastUpdate) / 1000 / 60;
           if (diffMinutes < 5) {
@@ -343,15 +344,15 @@ Component({
             };
           }
         }
-  
+
         return { success: true };
-  
+
       } catch (err) {
         console.error('检查更新权限失败:', err);
         return { success: false, message: '检查失败，请重试' };
       }
     },
-  
+
     // 取消选择持续时间
     onDurationCancel() {
       this.setData({
@@ -359,7 +360,7 @@ Component({
         selectedStatusId: null
       });
     },
-  
+
     // 确认持续时间
     async onDurationConfirm(e) {
       const duration = e.detail.duration;
@@ -369,7 +370,7 @@ Component({
         showDurationPicker: false,
         loading: true
       });
-  
+
       try {
         // 调用云函数设置状态（必须与 app.js 中 wx.cloud.init 的 env 一致，否则会调错环境）
         const envId = app.globalData.envId || 'cloud1-0g7t1v9lab94a58b';
@@ -403,7 +404,7 @@ Component({
         });
       }
     },
-  
+
     // Tab切换
     onTabChange(e) {
       const current = e.detail.current;
@@ -414,7 +415,7 @@ Component({
       }
     },
 
-  
+
     // 下拉刷新
     async onPullDownRefresh() {
       await this.loadStatusCounts();
