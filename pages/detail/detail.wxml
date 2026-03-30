@@ -67,7 +67,10 @@
         <text class="tabbar-btn-icon iconfont icon-a-139-fujin"/>
         <text class="tabbar-btn-text">附近</text>
       </view>
-      
+      <view class="tabbar-btn" bindtap="onNearby">
+        <text class="tabbar-btn-icon iconfont icon-fenxiang"/>
+        <text class="tabbar-btn-text">分享</text>
+      </view>
     </view>
   </view>
 
