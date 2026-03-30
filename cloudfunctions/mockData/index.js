@@ -14,11 +14,11 @@ const STATUS_LIST = [
   { id: 9, name: '写东西', icon: '✍️', Danmu: ['灵感爆棚中', '憋不出一个字', '文思如泉涌', '改稿第 N 版', '作家附体时刻', '笔耕不辍', '这句子绝了', '写完就睡觉'] },
   { id: 10, name: '相亲', icon: '💑', Danmu: ['尴尬扣出三室一厅', '看对眼了吗？', '查户口现场', '希望能成吧', '脚趾抠地中', '这也太普信了', '聊不到一块去', '缘分天注定'] },
   { id: 11, name: '谈恋爱', icon: '😚', Danmu: ['甜度严重超标', '又是吃狗粮', '想立刻结婚', '这就是爱情啊', '吵架也是糖', '满眼都是你', '锁死这对 CP', '单身狗退散'] },
-  { id: 12, name: '刷视频', icon: '📱', Danmu: ['再刷就天亮了', '大数据懂我', '笑出腹肌了', '根本停不下来', '这剧情神反转', '手不受控制了', '电子榨菜真香', '点赞收藏吃灰'] },
+  { id: 12, name: '刷视频', icon: '📱', Danmu: ['再刷就一天啦', '大数据懂我', '笑出腹肌了', '根本停不下来', '这剧情神反转', '手不受控制了', '电子榨菜真香', '点赞收藏吃灰'] },
   { id: 13, name: '加班', icon: '🏢', Danmu: ['公司是我家的', '凌晨三点见', '老板画饼中', '只想准点下班', '咖啡续命时刻', '这班非加不可？', '累觉不爱', '打工人的命'] },
   { id: 14, name: '失眠', icon: '🌙', Danmu: ['数羊数到一万', '脑子停不下来', '又是无眠夜', '想睡睡不着', '天快亮了吧', 'emo 时刻到了', '谁懂这种痛', '被迫清醒'] },
   { id: 15, name: '做饭', icon: '🍳', Danmu: ['黑暗料理诞生', '厨神附体时刻', '烟火气最抚人', '差点炸厨房', '真香现场', '盐放多了吗？', '为了这口吃的', '洗碗更痛苦'] },
-  { id: 16, name: '刷剧', icon: '📺', Danmu: ['熬夜也要追完', '编剧出来挨打', '磕到了磕到了', '反派太气人了', '结局意难平', '倍速播放启动', '纸巾不够用了', '这就大结局？'] },
+  { id: 16, name: '刷剧', icon: '📺', Danmu: ['熬夜也要追完', '编剧出来挨打', '磕到了磕到了', '反派太气人', '结局意难平', '倍速播放启动', '纸巾不够用了', '这就大结局？'] },
   { id: 17, name: '考研', icon: '📚', Danmu: ['上岸必成功！', '背不完根本背不完', '图书馆占座', '坚持就是胜利', '肖四肖八救命', '心态有点崩了', '为了梦想冲鸭', '最后再背一遍'] },
   { id: 18, name: '学外语', icon: '🗣️', Danmu: ['Abandon 放弃', '口语太烫嘴了', '听力像听天书', '单词记不住啊', 'Hello 走天下', '语言天赋为零', '今天打卡完成', '多邻国催命了'] },
   { id: 19, name: '找工作', icon: '💼', Danmu: ['面试又挂了', '简历已读不回', 'Offer 快来吧', '海投无音讯', 'HR 太能聊了', '期望薪资多少？', '不想上班想躺', '拿到 Offer 啦'] },
@@ -27,18 +27,51 @@ const STATUS_LIST = [
   { id: 22, name: '拉屎', icon: '💩', Danmu: ['备纸，出恭！', '带薪拉屎中', '我去释放一下内存', '腿麻了，谁扶我一下', '陪一根~', '一蹲就是半小时'] }
 ];
 
+// 2. 【核心】小时 - 对应状态映射（真实生活作息）
+const HOUR_STATUS_MAP = {
+  0: [7, 12, 14, 16, 21],        // 0点：发呆/刷视频/失眠/刷剧/打游戏
+  1: [7, 12, 14, 16, 21],        // 1点：发呆/刷视频/失眠/刷剧/打游戏
+  6: [5, 7, 12],                 // 6点：通勤/发呆/刷视频
+  7: [5, 4, 15],                 // 7点：通勤/干饭/做饭
+  8: [3, 9, 13, 17, 18, 19],     // 8点：写代码/写东西/加班/考研/学外语/找工作
+  9: [3, 9, 13, 17, 18, 19],     // 9点：工作学习
+  10: [3, 9, 13, 17, 18, 19, 22],// 10点：工作学习+拉屎
+  11: [3, 9, 13, 4, 15, 22],     // 11点：工作+干饭/做饭
+  12: [4, 15, 12, 7, 22],        // 12点：午饭/做饭/刷视频/发呆/拉屎
+  13: [3, 9, 13, 17, 18, 19, 7], // 13点：工作学习/发呆
+  14: [3, 9, 13, 17, 18, 19, 22],// 14点：工作学习+拉屎
+  15: [3, 9, 13, 17, 18, 19, 22],// 15点：工作学习+拉屎
+  16: [3, 9, 13, 17, 18, 19, 22],// 16点：工作学习+拉屎
+  17: [5, 4, 15],                // 17点：下班通勤/干饭/做饭
+  18: [4, 15, 6, 1, 20],         // 18点：晚饭/做饭/逛街/撸铁/带娃
+  19: [1, 2, 6, 11, 10, 20],     // 19点：健身/撸猫/逛街/恋爱/相亲/带娃
+  20: [1, 2, 6, 11, 10, 20],     // 20点：休闲娱乐
+  21: [12, 16, 21, 2, 7, 11],    // 21点：刷视频/刷剧/打游戏/撸猫/发呆/恋爱
+  22: [12, 16, 21, 2, 7, 8],     // 22点：刷视频/刷剧/打游戏/撸猫/发呆/睡觉
+  23: [7, 12, 14, 16, 21]        // 23点：发呆/刷视频/失眠/刷剧/打游戏
+};
+
 const ENV_ID = 'cloud1-0g7t1v9lab94a58b';
 
-// 2. 初始化云开发环境
+// 3. 初始化云开发环境
 cloud.init({
   env: ENV_ID
 })
 
 const db = cloud.database();
 
-// 3. 辅助函数
+// 4. 辅助函数
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// 根据当前小时获取随机状态
+function getRandomStatusByHour(currentHour) {
+  const allowedIds = HOUR_STATUS_MAP[currentHour] || [];
+  if (!allowedIds.length) return null;
+
+  const randomId = allowedIds[getRandomInt(0, allowedIds.length - 1)];
+  return STATUS_LIST.find(item => item.id === randomId) || STATUS_LIST[0];
 }
 
 function generateRandomLocation() {
@@ -50,7 +83,7 @@ function generateRandomLocation() {
   };
 }
 
-// 4. 云函数入口
+// 5. 云函数入口
 exports.main = async (event, context) => {
   const now = new Date();
   // 转换为北京时间
@@ -77,24 +110,24 @@ exports.main = async (event, context) => {
   const COUNT = 1;
   const danmusToInsert = [];
   const userStatusesToInsert = [];
-  
+
   // 计算过期时间 (1-30分钟后)
   const randomOffsetMs = getRandomInt(1 * 60 * 1000, 30 * 60 * 1000);
   const expireTime = new Date(now.getTime() + randomOffsetMs);
 
   // --- 准备数据 ---
   for (let i = 1; i <= COUNT; i++) {
-    const statusIndex = getRandomInt(0, 21);
-    const danmuIndex = getRandomInt(0, 5);
-    const statusObj = STATUS_LIST[statusIndex];
-    const safeDanmuIndex = danmuIndex < statusObj.Danmu.length ? danmuIndex : 0;
+    // ✅ 核心修改：根据当前小时获取对应状态（不再随机）
+    const statusObj = getRandomStatusByHour(currentHour);
+
+    const danmuIndex = getRandomInt(0, statusObj.Danmu.length - 1);
     const openId = `test-${i.toString().padStart(2, '0')}`;
     const location = generateRandomLocation();
 
     danmusToInsert.push({
       openId,
       statusId: statusObj.id,
-      danmuContent: statusObj.Danmu[safeDanmuIndex],
+      danmuContent: statusObj.Danmu[danmuIndex],
       createAt: now,
       expireTime,
       isExpired: false,
@@ -116,7 +149,6 @@ exports.main = async (event, context) => {
 
   try {
     // --- 执行任务 ---
-
     // 任务 A: 插入数据
     const insertPromise = Promise.all([
       db.collection('danmus').add({ data: danmusToInsert }),
@@ -125,18 +157,15 @@ exports.main = async (event, context) => {
 
     // 任务 B: 事务更新统计
     const transactionPromise = db.runTransaction(async (transaction) => {
-      // 统计需要增加的数量
       const counts = {};
       userStatusesToInsert.forEach(item => {
         counts[item.statusId] = (counts[item.statusId] || 0) + 1;
       });
 
-      // 遍历统计结果进行更新
       for (const idStr of Object.keys(counts)) {
         const statusId = parseInt(idStr);
         const countToAdd = counts[idStr];
 
-        // 1. 查询当前记录
         const queryRes = await transaction.collection('status_records')
           .where({ statusId: statusId })
           .get();
@@ -148,9 +177,8 @@ exports.main = async (event, context) => {
 
         const currentDoc = queryRes.data[0];
         const currentTotal = currentDoc.total || 0;
-        const newTotal = currentTotal + countToAdd; // 直接计算新值
+        const newTotal = currentTotal + countToAdd;
 
-        // 2. 更新记录 (使用 doc(_id) 精确更新)
         await transaction.collection('status_records')
           .doc(currentDoc._id)
           .update({
@@ -162,7 +190,6 @@ exports.main = async (event, context) => {
       }
     });
 
-    // 等待所有任务完成
     const [insertRes] = await Promise.all([insertPromise, transactionPromise]);
 
     return {

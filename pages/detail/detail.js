@@ -289,9 +289,9 @@ Page({
       const count = nearby.length;
       let summary = '';
       if (count > 0) {
-        summary = `附近有 ${count} 人也在${this.data.statusInfo.name || ''}`;
+        summary = `你附近有 ${count} 人也在${this.data.statusInfo.name || ''}`;
       } else {
-        summary = '附近除了你暂时没有同样状态的人';
+        summary = '你附近暂时没有该状态的人';
       }
 
       this.setData({
