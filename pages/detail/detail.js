@@ -72,6 +72,11 @@ Page({
     this.loadAndPlayActiveDanmus({ spread: true });
     this.initDanmuWatcher();
     this.startDanmuRefreshTimer();
+
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage']
+    });
   },
 
   onUnload() {
@@ -252,6 +257,25 @@ Page({
         }
       }
     });
+  },
+
+  // 正确：微信原生分享生命周期（必须叫这个名字！）
+  onShareAppMessage() {
+    const { statusInfo, count } = this.data;
+    const shareTitle = `${statusInfo.icon || ''} 哇！已有 ${count || 0} 人在「${statusInfo.name || '状态'}」，快来碰一下～`;
+
+    return {
+      title: shareTitle,
+      path: '/pages/detail/detail?selectedStatusId=' + this.data.selectedStatusId,
+    };
+  },
+
+  onShareTip() {
+    wx.showToast({
+      title: '点击右上角 · 分享给好友',
+      icon: 'none',
+      duration: 2000
+    })
   },
 
   // 计算附近 5000m 内同状态用户数量（基于 user_status 中的位置信息）
