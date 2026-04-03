@@ -50,13 +50,19 @@ exports.main = async (event, context) => {
       }
       reduceMap[key].count += 1;
     });
-    
+
     // 3. 批量更新 status_records，减少对应的 total
     const updatePromises = Object.values(reduceMap).map(async (item) => {
-      await db.collection('status_records')
+      const coll = db.collection('status_records');
+
+      // 只在 total 足够大时扣减，避免 total 扣成负数
+      // - total >= item.count：扣减 item.count（等价于多次 -1）
+      // - total < item.count：直接置为 0
+      await coll
         .where({
           _openid: item._openid,
-          statusId: item.statusId
+          statusId: item.statusId,
+          total: _.gte(item.count),
         })
         .update({
           data: {
@@ -64,10 +70,23 @@ exports.main = async (event, context) => {
             updateTime: now,
           }
         });
+
+      await coll
+        .where({
+          _openid: item._openid,
+          statusId: item.statusId,
+          total: _.lt(item.count),
+        })
+        .update({
+          data: {
+            total: 0,
+            updateTime: now,
+          }
+        });
     });
-    
+
     await Promise.all(updatePromises);
-    
+
     // 4. 删除已过期的记录
     const deleteIds = expiredRecords.data.map(r => r._id);
     // 注意：一次最多删除1000条，如果超过需要分批
@@ -80,14 +99,14 @@ exports.main = async (event, context) => {
           isExpired: true
         }
       });
-    
-   
+
+
     return {
       success: true,
       message: '清理完成',
       cleanedCount: expiredRecords.data.length
     };
-    
+
   } catch (error) {
     console.error('removeExpiredStatus error:', error);
     return {
@@ -131,5 +150,5 @@ exports.main = async (event, context) => {
       await Promise.all(deletePromises);
     }
     console.log("已删除的mock数据条数：:", deletedCount);
-  } 
+  }
 };
