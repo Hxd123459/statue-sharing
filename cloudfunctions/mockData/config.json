@@ -7,7 +7,7 @@
     {
       "name": "addMockData",
       "type": "timer",
-      "config": "*/4 * * * * *"
+      "config": "0 0 */8 * * *"
     }
   ]
 }
