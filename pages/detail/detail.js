@@ -1,6 +1,6 @@
 // pages/detail/detail.js
 const app = getApp();
-const { STATUS_MAP } = require('../../utils/constants.js');
+const { STATUS_LIST, STATUS_MAP } = require('../../utils/constants.js');
 const { debounce } = require('../../utils/util.js');
 
 Page({
@@ -29,6 +29,8 @@ Page({
     locationInfo: null,
     nearbyCount: null,
     nearbySummary: '',
+    showGroupQrModal: false,
+    groupQrUrl: '',
   },
 
   watcher: null,
@@ -43,12 +45,16 @@ Page({
     const statusInfo = status ? { id, name: status.name, icon: status.icon } : { id: null, name: '', icon: '' };
     const danmakuOptions = (status && Array.isArray(status.Danmu)) ? status.Danmu : [];
     const danmakuText = danmakuOptions.length > 0 ? danmakuOptions[0] : '来碰一下~';
+    console.log("111111111111" + id);
+    console.log("222222222222" + JSON.stringify(STATUS_LIST));
+    const statusFromList = STATUS_LIST.find(item => item.id === id);
     this.setData({
       selectedStatusId: id,
       statusInfo,
       danmakuOptions,
       selectedDanmakuIndex: 0,
       danmakuText,
+      groupQrUrl: (statusFromList && typeof statusFromList.group_QR_url === 'string') ? statusFromList.group_QR_url.trim() : '',
       theme: app.getTheme ? app.getTheme() : 'light',
     });
 
@@ -276,6 +282,15 @@ Page({
       icon: 'none',
       duration: 2000
     })
+  },
+
+  onGroupEntry() {
+    this.setData({ showGroupQrModal: true });
+    console.log("999999999999" + this.data.groupQrUrl);
+  },
+
+  onGroupModalClose() {
+    this.setData({ showGroupQrModal: false });
   },
 
   // 计算附近 5000m 内同状态用户数量（基于 user_status 中的位置信息）

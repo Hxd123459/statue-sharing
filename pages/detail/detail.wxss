@@ -37,8 +37,12 @@
 }
 
 @keyframes danmaku-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-2000rpx); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-2000rpx);
+  }
 }
 
 .current-status-title {
@@ -65,7 +69,11 @@
   width: 280rpx;
   height: 280rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
+  background: linear-gradient(
+    135deg,
+    var(--accent-color),
+    var(--accent-strong)
+  );
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,8 +136,15 @@
 }
 
 @keyframes tapDotPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0.6; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
 }
 .count-animate {
   animation: countChange 0.5s ease-out;
@@ -164,7 +179,7 @@
 .tabbar {
   width: 100%;
   max-width: 680rpx;
-  height: 120rpx;
+  height: 126rpx;
   background-color: var(--bg-card);
   border-radius: 60rpx;
   display: flex;
@@ -181,7 +196,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16rpx 8rpx;
+  padding: 14rpx 6rpx;
 }
 
 .tabbar-btn:active {
@@ -189,13 +204,13 @@
 }
 
 .tabbar-btn-icon {
-  font-size: 40rpx;
+  font-size: 36rpx;
   margin-bottom: 4rpx;
   color: var(--text-secondary);
 }
 
 .tabbar-btn-text {
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: var(--text-secondary);
 }
 
@@ -232,7 +247,11 @@
   width: 176rpx;
   height: 176rpx;
   border-radius: 36rpx;
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
+  background: linear-gradient(
+    135deg,
+    var(--accent-color),
+    var(--accent-strong)
+  );
   box-shadow: var(--shadow-soft);
   display: flex;
   align-items: center;
@@ -264,14 +283,22 @@
 }
 
 @keyframes collision-hit-right {
-  from { transform: translateY(-50%) translateX(0); }
+  from {
+    transform: translateY(-50%) translateX(0);
+  }
   /* 124rpx ≈ 让两侧图标在中心刚好贴边、不重叠 */
-  to   { transform: translateY(-50%) translateX(124rpx); }
+  to {
+    transform: translateY(-50%) translateX(124rpx);
+  }
 }
 
 @keyframes collision-hit-left {
-  from { transform: translateY(-50%) translateX(0); }
-  to   { transform: translateY(-50%) translateX(-124rpx); }
+  from {
+    transform: translateY(-50%) translateX(0);
+  }
+  to {
+    transform: translateY(-50%) translateX(-124rpx);
+  }
 }
 
 /* 撞住停留位置（不复原） */
@@ -285,21 +312,31 @@
 
 /* 回弹：稍微拉开一点距离 */
 .collision-scene.rebound .collision-icon-left {
-  animation: collision-rebound-left 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: collision-rebound-left 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    forwards;
 }
 
 .collision-scene.rebound .collision-icon-right {
-  animation: collision-rebound-right 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: collision-rebound-right 0.22s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    forwards;
 }
 
 @keyframes collision-rebound-left {
-  from { transform: translateY(-50%) translateX(124rpx); }
-  to   { transform: translateY(-50%) translateX(104rpx); }
+  from {
+    transform: translateY(-50%) translateX(124rpx);
+  }
+  to {
+    transform: translateY(-50%) translateX(104rpx);
+  }
 }
 
 @keyframes collision-rebound-right {
-  from { transform: translateY(-50%) translateX(-124rpx); }
-  to   { transform: translateY(-50%) translateX(-104rpx); }
+  from {
+    transform: translateY(-50%) translateX(-124rpx);
+  }
+  to {
+    transform: translateY(-50%) translateX(-104rpx);
+  }
 }
 
 /* 回弹后保持在回弹位置 */
@@ -325,9 +362,18 @@
 }
 
 @keyframes collision-pop {
-  0%   { opacity: 0; transform: translateX(-50%) scale(0.05); }
-  65%  { opacity: 1; transform: translateX(-50%) scale(1.1); }
-  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.05);
+  }
+  65% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 /* 回弹时爆裂消散 */
@@ -337,8 +383,14 @@
 }
 
 @keyframes collision-pop-out {
-  from { opacity: 1; transform: translateX(-50%) scale(1); }
-  to   { opacity: 0; transform: translateX(-50%) scale(1.3); }
+  from {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.3);
+  }
 }
 /* 弹幕弹框（与 duration-picker 风格一致） */
 .danmaku-mask {
@@ -355,8 +407,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .danmaku-content {
@@ -370,8 +426,12 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .danmaku-content .picker-header {
@@ -409,7 +469,11 @@
 }
 
 .danmaku-option.active {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
+  background: linear-gradient(
+    135deg,
+    var(--accent-color),
+    var(--accent-strong)
+  );
   border-color: var(--accent-color);
 }
 
@@ -455,11 +519,58 @@
 }
 
 .danmaku-content .btn-confirm {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
+  background: linear-gradient(
+    135deg,
+    var(--accent-color),
+    var(--accent-strong)
+  );
   color: white;
   font-weight: 500;
 }
 
 .danmaku-content .btn-confirm:active {
   opacity: 0.8;
+}
+
+.group-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--overlay-mask);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 0 48rpx;
+}
+
+.group-modal-content {
+  width: 100%;
+  background-color: var(--bg-card);
+  border-radius: 28rpx;
+  box-shadow: var(--shadow-soft);
+  padding: 36rpx 32rpx 28rpx;
+}
+
+.group-modal-body {
+  min-height: 420rpx;
+  border-radius: 20rpx;
+  background-color: var(--bg-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 26rpx;
+}
+
+.group-qr-image {
+  width: 100%;
+  height: 420rpx;
+}
+
+.group-empty-text {
+  font-size: 32rpx;
+  color: var(--text-secondary);
 }

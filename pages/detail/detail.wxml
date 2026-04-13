@@ -67,6 +67,10 @@
         <text class="tabbar-btn-icon iconfont icon-a-139-fujin"/>
         <text class="tabbar-btn-text">附近</text>
       </view>
+      <view class="tabbar-btn" bindtap="onGroupEntry">
+        <text class="tabbar-btn-icon iconfont icon-icon-lakejinqun-nor"/>
+        <text class="tabbar-btn-text">入群</text>
+      </view>
       <view class="tabbar-btn" bindtap="onShareTip">
         <text class="tabbar-btn-icon iconfont icon-fenxiang"/>
         <text class="tabbar-btn-text">分享</text>
@@ -105,6 +109,15 @@
       <view class="picker-actions">
         <button class="btn-cancel" bindtap="onDanmakuCancel">取消</button>
         <button class="btn-confirm" bindtap="onDanmakuConfirm">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="group-modal-mask" wx:if="{{showGroupQrModal}}" bindtap="onGroupModalClose" catchtouchmove="preventMove">
+    <view class="group-modal-content theme-{{theme}}" catchtap="stopPropagation">
+      <view class="group-modal-body">
+        <image wx:if="{{groupQrUrl}}" class="group-qr-image" mode="aspectFit" src="{{groupQrUrl}}" />
+        <text wx:else class="group-empty-text">无</text>
       </view>
     </view>
   </view>
