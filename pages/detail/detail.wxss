@@ -25,9 +25,9 @@
   left: 100%;
   white-space: nowrap;
   font-size: 28rpx;
-  color: #fff;
+  color: #f3f6fb;
   padding: 8rpx 20rpx;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(76, 95, 126, 0.22);
   border-radius: 24rpx;
   backdrop-filter: blur(6rpx);
   will-change: transform;
@@ -65,11 +65,11 @@
   width: 280rpx;
   height: 280rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-color, #8b5cf6), #7c3aed);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 16rpx 48rpx rgba(139, 92, 246, 0.35);
+  box-shadow: var(--shadow-soft);
   margin-bottom: 48rpx;
 }
 
@@ -108,7 +108,7 @@
   margin-top: 20rpx;
   padding: 10rpx 20rpx;
   border-radius: 999rpx;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--bg-soft);
   display: flex;
   align-items: center;
   gap: 10rpx;
@@ -170,7 +170,7 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-soft);
   overflow: hidden;
   padding: 0 16rpx;
 }
@@ -211,7 +211,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--overlay-mask);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -232,8 +232,8 @@
   width: 176rpx;
   height: 176rpx;
   border-radius: 36rpx;
-  background: linear-gradient(135deg, var(--accent-color, #8b5cf6), #7c3aed);
-  box-shadow: 0 16rpx 48rpx rgba(139, 92, 246, 0.35);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
+  box-shadow: var(--shadow-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -347,7 +347,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--overlay-mask);
   display: flex;
   align-items: flex-end;
   z-index: 9999;
@@ -398,7 +398,7 @@
   height: 96rpx;
   padding: 0 32rpx;
   margin-bottom: 16rpx;
-  background-color: var(--bg-primary);
+  background-color: var(--bg-soft);
   border-radius: 16rpx;
   border: 2rpx solid transparent;
   transition: all 0.2s ease;
@@ -409,7 +409,7 @@
 }
 
 .danmaku-option.active {
-  background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
   border-color: var(--accent-color);
 }
 
@@ -455,7 +455,7 @@
 }
 
 .danmaku-content .btn-confirm {
-  background: linear-gradient(135deg, var(--accent-color), #7c3aed);
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
   color: white;
   font-weight: 500;
 }

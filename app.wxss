@@ -2,12 +2,17 @@
 @import '/utils/font.wxss';
 /* 白天主题 */
 .theme-light {
-  --bg-primary: #F5F7FA;
-  --bg-card: #FFFFFF;
-  --text-primary: #1A1A1A;
-  --text-secondary: #8E8E93;
-  --accent-color: #8B5CF6;
-  --divider-color: #E5E5EA;
+  --bg-primary: #f7f9fc;
+  --bg-card: #ffffff;
+  --bg-soft: #f2f5fb;
+  --text-primary: #263043;
+  --text-secondary: #7f8aa3;
+  --accent-color: #88a4c7;
+  --accent-strong: #6f90ba;
+  --divider-color: #e8edf4;
+  --overlay-mask: rgba(27, 39, 60, 0.24);
+  --shadow-soft: 0 10rpx 30rpx rgba(105, 128, 161, 0.08);
+  --shadow-card: 0 4rpx 16rpx rgba(105, 128, 161, 0.06);
   --gold-gradient-start: #FFD700;
   --gold-gradient-end: #FFA500;
   --silver-gradient-start: #C0C0C0;
@@ -18,12 +23,17 @@
 
 /* 黑夜主题 */
 .theme-dark {
-  --bg-primary: #1C1C1E;
-  --bg-card: #2C2C2E;
-  --text-primary: #FFFFFF;
-  --text-secondary: #AEAEB2;
-  --accent-color: #8B5CF6;
-  --divider-color: #38383A;
+  --bg-primary: #171b23;
+  --bg-card: #202733;
+  --bg-soft: #252d3a;
+  --text-primary: #eef3fc;
+  --text-secondary: #99a8c2;
+  --accent-color: #8ea8cc;
+  --accent-strong: #b4c4dd;
+  --divider-color: #313b49;
+  --overlay-mask: rgba(7, 9, 12, 0.55);
+  --shadow-soft: 0 10rpx 30rpx rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 4rpx 16rpx rgba(0, 0, 0, 0.16);
   --gold-gradient-start: #FFD700;
   --gold-gradient-end: #FFA500;
   --silver-gradient-start: #D1D1D6;
